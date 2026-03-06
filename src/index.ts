@@ -1,5 +1,7 @@
+/** @group Analysis */
 export { processCityJsonFiles } from "./analysis/file-analyzer.js";
 
+/** @group Public Types */
 export type {
   BuildingAnalysisResult,
   BuildingGeometryMetrics,

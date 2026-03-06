@@ -1,0 +1,29 @@
+{
+    "entryPoints": [
+        "src/index.ts"
+    ],
+    "out": "docs/api",
+    "plugin": [
+        "typedoc-plugin-markdown"
+    ],
+    "readme": "README.md",
+    "cleanOutputDir": true,
+    "categorizeByGroup": true,
+    "groupOrder": [
+        "Analysis",
+        "Public Types",
+        "Geometry",
+        "Coordinate Reference System",
+        "Discovery",
+        "Validation",
+        "Shared",
+        "CLI",
+        "*"
+    ],
+    "sort": [
+        "source-order"
+    ],
+    "excludePrivate": false,
+    "excludeProtected": false,
+    "excludeInternal": true
+}

@@ -1,8 +1,10 @@
+**@csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment**
+
+***
+
 # Regensburg Digitaler Energiezwilling - Offline Enrichment
 
 Offline enrichment tool for CityJSON files.
-
-API documentation: [`docs/api/index.html`](docs/api/index.html)
 
 The tool scans a folder for `*.json`, validates CityJSON structure, computes building geometry metrics, and writes the metrics back into each `Building` / `BuildingPart` under:
 

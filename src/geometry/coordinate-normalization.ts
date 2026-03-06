@@ -6,6 +6,13 @@ import type { GeometryCrsOptions, Vertex } from "../shared/types.js";
 
 const proj4List = proj4ListModule as unknown as Record<string, [string, string]>;
 
+/**
+ * Normalizes different CRS notations into an internally processable format.
+ *
+ * @group Geometry
+ * @param referenceSystem Input CRS from metadata or fallback.
+ * @returns Normalized CRS code or `null` for unsupported formats.
+ */
 function normalizeCrsCode(referenceSystem: string): string | null {
   const trimmed = referenceSystem.trim();
 
@@ -34,6 +41,12 @@ function normalizeCrsCode(referenceSystem: string): string | null {
   return null;
 }
 
+/**
+ * Ensures a proj4 definition is available for a CRS.
+ *
+ * @group Geometry
+ * @param crs CRS code or direct proj4 definition.
+ */
 function ensureProjDefinition(crs: string): void {
   if (crs.includes("+proj=")) {
     return;
@@ -48,6 +61,13 @@ function ensureProjDefinition(crs: string): void {
   }
 }
 
+/**
+ * Returns the underlying proj4 definition string of a CRS.
+ *
+ * @group Geometry
+ * @param crs CRS code or direct proj4 definition.
+ * @returns Definition string or `null` if it cannot be resolved.
+ */
 function getDefinitionString(crs: string): string | null {
   if (crs.includes("+proj=")) {
     return crs;
@@ -62,6 +82,13 @@ function getDefinitionString(crs: string): string | null {
   return fromList ?? null;
 }
 
+/**
+ * Checks whether a CRS is geographic (lon/lat) instead of projected.
+ *
+ * @group Geometry
+ * @param crs CRS to check.
+ * @returns `true` if the CRS is geographic.
+ */
 function isGeographicCrs(crs: string): boolean {
   const definition = getDefinitionString(crs);
   if (!definition) {
@@ -71,6 +98,13 @@ function isGeographicCrs(crs: string): boolean {
   return definition.includes("+proj=longlat") || definition.includes("+proj=latlong");
 }
 
+/**
+ * Computes the center of the XY bounding box as lon/lat.
+ *
+ * @group Geometry
+ * @param vertices Vertex list in a geographic CRS.
+ * @returns Center as `[lon, lat]`.
+ */
 function calculateBboxCenterLonLat(vertices: Vertex[]): [number, number] {
   if (vertices.length === 0) {
     throw new Error("Cannot infer CRS from empty vertex list.");
@@ -100,6 +134,13 @@ function calculateBboxCenterLonLat(vertices: Vertex[]): [number, number] {
   return [lon, lat];
 }
 
+/**
+ * Infers a suitable UTM CRS from lon/lat coordinates.
+ *
+ * @group Geometry
+ * @param vertices Vertex list in a geographic CRS.
+ * @returns EPSG code of the inferred UTM zone.
+ */
 function inferUtmCrsFromLonLat(vertices: Vertex[]): string {
   const [lon, lat] = calculateBboxCenterLonLat(vertices);
   const zone = Math.max(1, Math.min(60, Math.floor((lon + 180) / 6) + 1));
@@ -110,6 +151,13 @@ function inferUtmCrsFromLonLat(vertices: Vertex[]): string {
   return epsg;
 }
 
+/**
+ * Decodes CityJSON vertices while applying `transform`.
+ *
+ * @group Geometry
+ * @param cityJson Input object.
+ * @returns Decoded vertex list.
+ */
 function decodeVertices(cityJson: CityJSONV201): Vertex[] {
   const transform = cityJson.transform;
 
@@ -127,11 +175,28 @@ function decodeVertices(cityJson: CityJSONV201): Vertex[] {
   ]);
 }
 
+/**
+ * Transforms a vertex from a source CRS to a target CRS.
+ *
+ * @group Geometry
+ * @param vertex Vertex to transform.
+ * @param sourceCrs Source CRS.
+ * @param targetCrs Target CRS.
+ * @returns Transformed vertex.
+ */
 function projectVertex(vertex: Vertex, sourceCrs: string, targetCrs: string): Vertex {
   const projected = proj4(sourceCrs, targetCrs, [vertex[0], vertex[1]]) as [number, number];
   return [projected[0], projected[1], vertex[2]];
 }
 
+/**
+ * Returns normalized (metric) vertices for geometry analysis.
+ *
+ * @group Geometry
+ * @param cityJson Parsed CityJSON v2.0.1.
+ * @param options CRS options with optional fallback.
+ * @returns Vertex list in a suitable analysis CRS.
+ */
 export function normalizeVerticesForGeometry(
   cityJson: CityJSONV201,
   options: GeometryCrsOptions = {},

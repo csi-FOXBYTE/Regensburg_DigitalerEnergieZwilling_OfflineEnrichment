@@ -1,6 +1,14 @@
 import type { PolygonFace, Vertex } from "../shared/types.js";
 import { isObject } from "../shared/guards.js";
 
+/**
+ * Resolves the semantic surface type from a semantic reference.
+ *
+ * @group Geometry
+ * @param semantics Semantics block of the geometry object.
+ * @param semanticIndex Index in `semantics.surfaces`.
+ * @returns Semantic type or `undefined`.
+ */
 function semanticTypeFromIndex(semantics: unknown, semanticIndex: unknown): string | undefined {
   if (typeof semanticIndex !== "number") {
     return undefined;
@@ -18,11 +26,27 @@ function semanticTypeFromIndex(semantics: unknown, semanticIndex: unknown): stri
   return surface.type;
 }
 
+/**
+ * Retrieves a vertex by index from the vertex array.
+ *
+ * @group Geometry
+ * @param index Vertex index.
+ * @param vertices Available vertex list.
+ * @returns Vertex or `null` if the index is invalid.
+ */
 function asVertex(index: number, vertices: Vertex[]): Vertex | null {
   const vertex = vertices[index];
   return vertex ?? null;
 }
 
+/**
+ * Converts CityJSON boundaries into a ring structure of vertex coordinates.
+ *
+ * @group Geometry
+ * @param boundary Raw structure with vertex indices.
+ * @param vertices Vertex list.
+ * @returns Valid rings with at least three points.
+ */
 function indicesToRings(boundary: unknown, vertices: Vertex[]): Vertex[][] {
   if (!Array.isArray(boundary)) {
     return [];
@@ -56,6 +80,14 @@ function indicesToRings(boundary: unknown, vertices: Vertex[]): Vertex[][] {
   return rings;
 }
 
+/**
+ * Extracts polygonal faces from supported CityJSON geometry types.
+ *
+ * @group Geometry
+ * @param geometry Geometry object of a CityObject.
+ * @param vertices Normalized vertex list.
+ * @returns Extracted faces including optional semantics.
+ */
 export function extractFacesFromGeometry(geometry: unknown, vertices: Vertex[]): PolygonFace[] {
   if (!isObject(geometry) || typeof geometry.type !== "string") {
     return [];

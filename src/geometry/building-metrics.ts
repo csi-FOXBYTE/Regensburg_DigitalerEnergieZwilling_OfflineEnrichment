@@ -1,6 +1,13 @@
 import type { BuildingGeometryMetrics, PolygonFace } from "../shared/types.js";
 import { polygonArea, polygonNormal, polygonSignedVolumeContribution } from "./polygon-math.js";
 
+/**
+ * Computes building metrics from a set of polygonal faces.
+ *
+ * @group Geometry
+ * @param faces Extracted faces of a building.
+ * @returns Aggregated geometric metrics.
+ */
 export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): BuildingGeometryMetrics {
   let signedVolume = 0;
   let groundArea = 0;
@@ -52,7 +59,7 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
 
     if (face.semanticType === "WallSurface") {
       const normal = polygonNormal(face.rings[0]!);
-      
+
       if (!normal || Math.abs(normal[2]) <= 0.2) {
         wallArea += area;
       }

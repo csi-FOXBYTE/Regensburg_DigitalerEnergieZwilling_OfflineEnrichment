@@ -1,6 +1,13 @@
 import type { Vertex } from "../shared/types.js";
 import { cross, dot, magnitude, normalize, vectorSubtract } from "./vector-math.js";
 
+/**
+ * Computes the area of a single ring by triangulation.
+ *
+ * @group Geometry
+ * @param ring Closed or open ring as a point list.
+ * @returns Ring area.
+ */
 function ringArea(ring: Vertex[]): number {
   if (ring.length < 3) {
     return 0;
@@ -18,6 +25,13 @@ function ringArea(ring: Vertex[]): number {
   return area;
 }
 
+/**
+ * Computes the signed volume contribution of a ring relative to the origin.
+ *
+ * @group Geometry
+ * @param ring Ring as a point list.
+ * @returns Signed volume contribution.
+ */
 function ringSignedVolumeContribution(ring: Vertex[]): number {
   if (ring.length < 3) {
     return 0;
@@ -35,6 +49,13 @@ function ringSignedVolumeContribution(ring: Vertex[]): number {
   return volume;
 }
 
+/**
+ * Computes polygon area as outer ring minus inner rings.
+ *
+ * @group Geometry
+ * @param rings Ring list where the first ring is the outer ring.
+ * @returns Non-negative polygon area.
+ */
 export function polygonArea(rings: Vertex[][]): number {
   if (rings.length === 0) {
     return 0;
@@ -45,6 +66,13 @@ export function polygonArea(rings: Vertex[][]): number {
   return Math.max(0, outerArea - holes);
 }
 
+/**
+ * Computes a normalized face normal of a ring (Newell method).
+ *
+ * @group Geometry
+ * @param ring Ring as a point list.
+ * @returns Normal vector or `null` for degenerate geometry.
+ */
 export function polygonNormal(ring: Vertex[]): Vertex | null {
   if (ring.length < 3) {
     return null;
@@ -65,6 +93,13 @@ export function polygonNormal(ring: Vertex[]): Vertex | null {
   return normalize([nx, ny, nz]);
 }
 
+/**
+ * Sums signed volume contributions across all rings.
+ *
+ * @group Geometry
+ * @param rings Ring list of a polygon.
+ * @returns Signed volume contribution.
+ */
 export function polygonSignedVolumeContribution(rings: Vertex[][]): number {
   return rings.reduce((sum, ring) => sum + ringSignedVolumeContribution(ring), 0);
 }

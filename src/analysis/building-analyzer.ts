@@ -5,6 +5,13 @@ import { normalizeVerticesForGeometry } from "../geometry/coordinate-normalizati
 import { isObject } from "../shared/guards.js";
 import type { BuildingAnalysisResult, GeometryCrsOptions } from "../shared/types.js";
 
+/**
+ * Writes computed metrics into a CityObject's attributes.
+ *
+ * @group Analysis
+ * @param cityObject Target object inside `CityObjects`.
+ * @param metrics Computed building metrics.
+ */
 function enrichCityObjectAttributes(
   cityObject: Record<string, unknown>,
   metrics: BuildingAnalysisResult["metrics"],
@@ -16,6 +23,14 @@ function enrichCityObjectAttributes(
   };
 }
 
+/**
+ * Analyzes all building objects in a CityJSON document.
+ *
+ * @group Analysis
+ * @param cityJson Parsed CityJSON v2.0.1.
+ * @param crsOptions Options for CRS normalization.
+ * @returns Analysis results for all detected `Building`/`BuildingPart` objects.
+ */
 export function analyzeBuildings(
   cityJson: CityJSONV201,
   crsOptions: GeometryCrsOptions = {},

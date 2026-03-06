@@ -10,6 +10,15 @@ import type {
 import { isCityJsonLike } from "../validation/cityjson.js";
 import { analyzeBuildings } from "./building-analyzer.js";
 
+/**
+ * Analyzes all CityJSON files in a directory, enriches building attributes,
+ * and writes updated files back.
+ *
+ * @group Analysis
+ * @param srcDir Source directory with JSON files.
+ * @param options Options for CRS normalization and processing.
+ * @returns Aggregated result of file and building analysis.
+ */
 export async function processCityJsonFiles(
   srcDir: string,
   options: ProcessCityJsonFilesOptions = {},
