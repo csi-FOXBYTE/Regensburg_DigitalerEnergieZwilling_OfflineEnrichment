@@ -2,7 +2,7 @@
 
 Offline enrichment tool for CityJSON files.
 
-API documentation: [`docs/api/index.html`](docs/api/index.html)
+API documentation: [`docs/api/README.md`](docs/api/index.html)
 
 The tool scans a folder for `*.json`, validates CityJSON structure, computes building geometry metrics, and writes the metrics back into each `Building` / `BuildingPart` under:
 
