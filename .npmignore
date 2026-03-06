@@ -1,0 +1,11 @@
+.dockerignore
+.gitignore
+test/
+src/
+tsconfig.json
+tsdown.config.ts
+Dockerfile
+.devcontainer
+.pnpm-store
+node_modules
+*.tgz

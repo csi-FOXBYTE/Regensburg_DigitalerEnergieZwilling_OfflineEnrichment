@@ -1,0 +1,17 @@
+{
+  "name": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22",
+      "pnpmVersion": "10.7.1"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "@csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment",
+  "version": "0.0.0",
+  "description": "Offline CityJSON enrichment for building geometry metrics and digitalEnergyTwin attributes.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --import tsx \"test/**/*.test.ts\"",
+    "build": "pnpm run lint && pnpm run test && tsdown",
+    "lint": "tsc --noEmit",
+    "prepack": "pnpm run build"
+  },
+  "keywords": [
+    "cityjson",
+    "citygml",
+    "energy",
+    "digital",
+    "twin"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "publint": "^0.3.18",
+    "tsdown": "^0.21.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./cli": {
+      "import": "./dist/cli.mjs",
+      "require": "./dist/cli.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "dependencies": {
+    "proj4": "^2.20.3",
+    "proj4-list": "^1.0.4",
+    "tiny-glob": "^0.2.9"
+  }
+}
