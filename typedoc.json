@@ -6,7 +6,7 @@
     "plugin": [
         "typedoc-plugin-markdown"
     ],
-    "readme": "README.md",
+    "readme": "none",
     "cleanOutputDir": true,
     "categorizeByGroup": true,
     "groupOrder": [

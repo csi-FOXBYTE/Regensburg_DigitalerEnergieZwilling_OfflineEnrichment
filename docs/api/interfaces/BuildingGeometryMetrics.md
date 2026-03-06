@@ -2,11 +2,11 @@
 
 ***
 
-[@csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment](../globals.md) / BuildingGeometryMetrics
+[@csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment](../README.md) / BuildingGeometryMetrics
 
 # Interface: BuildingGeometryMetrics
 
-Defined in: [shared/types.ts:25](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L25)
+Defined in: [shared/types.ts:25](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L25)
 
 Aggregated geometric metrics of a building.
 
@@ -16,7 +16,7 @@ Aggregated geometric metrics of a building.
 
 > **volume**: `number`
 
-Defined in: [shared/types.ts:27](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L27)
+Defined in: [shared/types.ts:27](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L27)
 
 Building volume in cubic units of the CRS.
 
@@ -26,7 +26,7 @@ Building volume in cubic units of the CRS.
 
 > **groundArea**: `number`
 
-Defined in: [shared/types.ts:29](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L29)
+Defined in: [shared/types.ts:29](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L29)
 
 Ground area.
 
@@ -36,7 +36,7 @@ Ground area.
 
 > **upperFloorArea**: `number`
 
-Defined in: [shared/types.ts:31](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L31)
+Defined in: [shared/types.ts:31](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L31)
 
 Upper floor area (currently tied to `groundArea`).
 
@@ -46,7 +46,7 @@ Upper floor area (currently tied to `groundArea`).
 
 > **grossExternalWallArea**: `number`
 
-Defined in: [shared/types.ts:33](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L33)
+Defined in: [shared/types.ts:33](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L33)
 
 Gross external wall area.
 
@@ -56,7 +56,7 @@ Gross external wall area.
 
 > **roofArea**: `number`
 
-Defined in: [shared/types.ts:35](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L35)
+Defined in: [shared/types.ts:35](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L35)
 
 Roof area.
 
@@ -66,7 +66,7 @@ Roof area.
 
 > **roofPitchDegrees**: `number` \| `null`
 
-Defined in: [shared/types.ts:37](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L37)
+Defined in: [shared/types.ts:37](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L37)
 
 Area-weighted mean roof pitch in degrees.
 
@@ -76,7 +76,7 @@ Area-weighted mean roof pitch in degrees.
 
 > **height**: `number` \| `null`
 
-Defined in: [shared/types.ts:39](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L39)
+Defined in: [shared/types.ts:39](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L39)
 
 Building height as the difference between minimum ground Z and maximum roof Z.
 
@@ -86,6 +86,6 @@ Building height as the difference between minimum ground Z and maximum roof Z.
 
 > **envelopeArea**: `number`
 
-Defined in: [shared/types.ts:41](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L41)
+Defined in: [shared/types.ts:41](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L41)
 
 Envelope area from ground, wall, and roof surfaces.

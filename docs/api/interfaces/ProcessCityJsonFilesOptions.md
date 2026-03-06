@@ -2,11 +2,11 @@
 
 ***
 
-[@csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment](../globals.md) / ProcessCityJsonFilesOptions
+[@csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment](../README.md) / ProcessCityJsonFilesOptions
 
 # Interface: ProcessCityJsonFilesOptions
 
-Defined in: [shared/types.ts:99](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L99)
+Defined in: [shared/types.ts:99](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L99)
 
 Options for file processing.
 
@@ -20,7 +20,7 @@ Options for file processing.
 
 > `optional` **sourceCrsFallback**: `string`
 
-Defined in: [shared/types.ts:91](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/dd79bff9e46196bbc7547cb27e1c6dc96c9177de/src/shared/types.ts#L91)
+Defined in: [shared/types.ts:91](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L91)
 
 Fallback CRS when `metadata.referenceSystem` is missing.
 
