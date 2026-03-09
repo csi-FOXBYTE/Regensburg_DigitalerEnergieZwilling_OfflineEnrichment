@@ -6,6 +6,7 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml tsconfig.json tsdown.config.ts ./
 COPY src ./src
+COPY test ./test
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm run build

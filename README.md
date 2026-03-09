@@ -49,6 +49,16 @@ Uses Node's internal test runner:
 pnpm test
 ```
 
+Docker end-to-end integration test (builds the image, runs container, and validates enriched output):
+
+```bash
+pnpm run test:e2e:docker
+```
+
+Notes:
+- Requires Docker daemon access.
+- Runs only when explicitly invoked to keep default test runs fast.
+
 ## Usage (Library)
 
 ```ts
