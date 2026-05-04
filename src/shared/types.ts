@@ -39,6 +39,10 @@ export interface BuildingGeometryMetrics {
   height: number | null;
   /** Envelope area from ground, wall, and roof surfaces. */
   envelopeArea: number;
+  /** Estimated roof window area (20% of roofArea). */
+  roofWindowArea: number;
+  /** Estimated external wall window area (20% of grossExternalWallArea). */
+  externalWallWindowArea: number;
 }
 
 /**

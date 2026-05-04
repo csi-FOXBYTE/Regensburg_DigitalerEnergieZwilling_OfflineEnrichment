@@ -81,5 +81,7 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
     roofPitchDegrees,
     height,
     envelopeArea,
+    roofWindowArea: roofArea * 0.2,
+    externalWallWindowArea: wallArea * 0.2,
   };
 }

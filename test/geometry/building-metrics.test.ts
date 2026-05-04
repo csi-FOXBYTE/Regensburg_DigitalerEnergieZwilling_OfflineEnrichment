@@ -24,4 +24,6 @@ test("geometry/building-metrics: calculates envelope, areas and height", () => {
   assert.equal(metrics.height, 2);
   assert.equal(metrics.roofPitchDegrees, 0);
   assert.ok(metrics.volume > 0);
+  assert.equal(metrics.roofWindowArea, 0.2);
+  assert.equal(metrics.externalWallWindowArea, 1.6);
 });

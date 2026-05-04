@@ -17,6 +17,8 @@ const EXPECTED_METRIC_KEYS = [
     "roofPitchDegrees",
     "height",
     "envelopeArea",
+    "roofWindowArea",
+    "externalWallWindowArea",
 ] as const;
 
 test("integration: enriches copied CityJSON files and validates output", async () => {

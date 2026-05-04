@@ -20,6 +20,8 @@ const EXPECTED_METRIC_KEYS = [
   "roofPitchDegrees",
   "height",
   "envelopeArea",
+  "roofWindowArea",
+  "externalWallWindowArea",
 ] as const;
 
 async function hasDocker(): Promise<boolean> {
