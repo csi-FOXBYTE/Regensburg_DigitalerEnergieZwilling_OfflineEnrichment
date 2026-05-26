@@ -4,9 +4,7 @@ Offline enrichment tool for CityJSON files.
 
 API documentation: [`docs/api/README.md`](docs/api/README.md)
 
-The tool scans a folder for `*.json`, validates CityJSON structure, computes building geometry metrics, and writes the metrics back into each `Building` / `BuildingPart` under:
-
-- `attributes.digitalEnergyTwin`
+The tool scans a folder for `*.json`, validates CityJSON structure, computes building geometry metrics, and writes the metrics back into each `Building` / `BuildingPart` under `attributes.digitalEnergyTwin`. An optional adjacency pass detects shared walls between neighbouring buildings across tile boundaries and adds the results to the same attribute block.
 
 ## Features
 
@@ -21,19 +19,28 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
   - `roofPitchDegrees`
   - `height`
   - `envelopeArea`
+  - `roofWindowArea`
+  - `externalWallWindowArea`
 - CRS handling with `proj4` + `proj4-list`
   - accepts EPSG forms (`EPSG:25832`, `EPSG::25832`, OGC EPSG URL, numeric code)
   - accepts raw Proj4 strings (`+proj=...`)
   - decodes CityJSON `transform` before calculations
   - if source CRS is geographic, auto-selects UTM zone from dataset center
   - if source CRS is missing, assumes lon/lat and auto-projects to inferred UTM
-- In-place JSON rewrite after enrichment
+- Optional adjacency pass (`--adjacency`):
+  - indexes all `WallSurface` faces across all input files into a SpatiaLite database
+  - uses an R\*Tree spatial index to find candidate wall face pairs within a configurable tolerance
+  - computes the actual shared wall area via symmetric 3D polygon intersection (Sutherland-Hodgman on the average projection plane)
+  - handles cross-tile adjacencies — buildings near a tile edge are correctly matched against buildings in neighbouring tiles
+- Output written in place or to a separate output directory (`--out`)
 
 ## Installation
 
 ```bash
 pnpm install
 ```
+
+Requires `libsqlite3-mod-spatialite` (Debian/Ubuntu) or `libspatialite` (Alpine) for the adjacency pass. The extension is loaded automatically; set `SPATIALITE_PATH` only if it lives outside the default search paths.
 
 ## Build
 
@@ -66,6 +73,7 @@ import { processCityJsonFiles } from "@csi-foxbyte/Regensburg_DigitalerEnergieZw
 
 const result = await processCityJsonFiles("./data", {
   sourceCrsFallback: "EPSG:25832",
+  adjacency: true,
 });
 
 console.log(result.files);
@@ -77,9 +85,11 @@ console.log(result.files);
 
 Options:
 
-- `sourceCrsFallback?: string`
-  - Used when `metadata.referenceSystem` is missing.
-  - Supports EPSG and raw Proj4 strings.
+| Option | Type | Description |
+|---|---|---|
+| `sourceCrsFallback` | `string` | Used when `metadata.referenceSystem` is missing. Supports EPSG and raw Proj4 strings. |
+| `outDir` | `string` | Write enriched files here instead of overwriting the originals. |
+| `adjacency` | `boolean` | Run the adjacency pass after indexing all buildings. |
 
 Return shape:
 
@@ -95,15 +105,27 @@ After build:
 node dist/cli.mjs --src ./data --source-crs-fallback EPSG:25832
 ```
 
-Environment alternatives:
-
-- `INPUT_DIR` (default: `/data`)
-- `SOURCE_CRS_FALLBACK`
-
-Example:
+With adjacency pass and separate output directory:
 
 ```bash
-INPUT_DIR=./data SOURCE_CRS_FALLBACK=EPSG:25832 node dist/cli.mjs
+node dist/cli.mjs --src ./data --out ./output --adjacency
+```
+
+Environment alternatives:
+
+| Flag | Env var | Default |
+|---|---|---|
+| `--src` | `INPUT_DIR` | `/data` |
+| `--out` | `OUTPUT_DIR` | *(in place)* |
+| `--adjacency` | `ADJACENCY=1` | *(off)* |
+| `--tolerance` | `TOLERANCE` | `0.15` |
+| `--source-crs-fallback` | `SOURCE_CRS_FALLBACK` | *(none)* |
+| *(SpatiaLite path)* | `SPATIALITE_PATH` | *(auto-detected)* |
+
+Example with environment variables:
+
+```bash
+INPUT_DIR=./data OUTPUT_DIR=./output ADJACENCY=1 node dist/cli.mjs
 ```
 
 ## Docker
@@ -122,13 +144,15 @@ docker run --rm \
   det-offline-enrichment
 ```
 
-With CRS fallback:
+With adjacency pass and separate output:
 
 ```bash
 docker run --rm \
-  -v "$(pwd)/data:/data" \
-  -e SOURCE_CRS_FALLBACK="EPSG:25832" \
-  det-offline-enrichment
+  -v "$(pwd)/data/cityjson:/data/cityjson" \
+  -v "$(pwd)/data/output:/data/output" \
+  -e ADJACENCY=1 \
+  det-offline-enrichment \
+  node dist/cli.mjs --src /data/cityjson --out /data/output --adjacency
 ```
 
 ## Output Enrichment Format
@@ -146,27 +170,36 @@ For each analyzed building object:
       "roofArea": 0,
       "roofPitchDegrees": 0,
       "height": 0,
-      "envelopeArea": 0
+      "envelopeArea": 0,
+      "roofWindowArea": 0,
+      "externalWallWindowArea": 0,
+      "adjacentBuildings": [
+        { "buildingId": "DEBY_LOD2_12345", "sharedWallArea": 42.3 }
+      ]
     }
   }
 }
 ```
 
+`adjacentBuildings` is only present when the adjacency pass is enabled.
+
 ## Important Notes
 
-- Input files are rewritten in place.
+- Input files are rewritten in place unless `--out` is specified.
 - Non-CityJSON files are skipped.
 - Files with geometry/CRS issues are skipped with a reason in the result.
 - Coordinates are normalized before metric calculation.
+- The adjacency pass tolerance (currently 0.5 m) is pending confirmation from the customer.
 
 ## Project Structure
 
-- `src/analysis` - orchestration and file processing
-- `src/discovery` - input file discovery
-- `src/geometry` - coordinate normalization and geometry math
-- `src/shared` - shared types/guards
-- `src/validation` - CityJSON validation
-- `test` - domain unit tests + integration test
+- `src/analysis` — orchestration and file processing
+- `src/db` — SpatiaLite spatial database for adjacency indexing
+- `src/discovery` — input file discovery
+- `src/geometry` — coordinate normalization and geometry math
+- `src/shared` — shared types/guards
+- `src/validation` — CityJSON validation
+- `test` — unit tests + integration tests
 
 ## License
 

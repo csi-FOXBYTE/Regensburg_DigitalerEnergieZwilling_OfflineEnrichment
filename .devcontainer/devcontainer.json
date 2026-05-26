@@ -1,15 +1,16 @@
 {
   "name": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker": {
       "moby": false
     },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22",
-      "pnpmVersion": "10.7.1"
+      "pnpmVersion": "11.3.0"
     }
   },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libsqlite3-mod-spatialite",
   "customizations": {
     "vscode": {
       "extensions": [

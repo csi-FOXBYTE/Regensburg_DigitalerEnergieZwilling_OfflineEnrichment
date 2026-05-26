@@ -8,6 +8,12 @@ import { processCityJsonFiles } from "./index.js";
 interface CliOptions {
   /** Source directory containing JSON files to process. */
   srcDir: string;
+  /** Output directory; writes in place when omitted. */
+  outDir?: string | undefined;
+  /** Whether to run the adjacency pass. */
+  adjacency: boolean;
+  /** Maximum distance in metres between wall faces to count as adjacent. */
+  adjacencyTolerance: number;
   /** Optional fallback for missing CRS information in the input. */
   sourceCrsFallback?: string | undefined;
 }
@@ -41,11 +47,17 @@ function readArg(flag: string): string | undefined {
  */
 function parseCliOptions(): CliOptions {
   const srcDir = readArg("--src") ?? process.env.INPUT_DIR ?? "/data";
+  const outDir = readArg("--out") ?? process.env.OUTPUT_DIR;
+  const adjacency = process.argv.includes("--adjacency") || process.env.ADJACENCY === "1";
+  const adjacencyTolerance = parseFloat(readArg("--tolerance") ?? process.env.TOLERANCE ?? "0.15");
   const sourceCrsFallback =
     readArg("--source-crs-fallback") ?? process.env.SOURCE_CRS_FALLBACK;
 
   return {
     srcDir,
+    outDir,
+    adjacency,
+    adjacencyTolerance,
     sourceCrsFallback,
   };
 }
@@ -57,10 +69,13 @@ function parseCliOptions(): CliOptions {
  */
 function printUsage(): void {
   console.log(`Usage:
-  node dist/cli.mjs --src /data [--source-crs-fallback EPSG:25832]
+  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832]
 
 Environment alternatives:
   INPUT_DIR=/data
+  OUTPUT_DIR=/data/output
+  ADJACENCY=1
+  TOLERANCE=0.15
   SOURCE_CRS_FALLBACK=EPSG:25832`);
 }
 
@@ -77,6 +92,9 @@ async function main(): Promise<void> {
 
   const options = parseCliOptions();
   const result = await processCityJsonFiles(options.srcDir, {
+    outDir: options.outDir,
+    adjacency: options.adjacency,
+    adjacencyTolerance: options.adjacencyTolerance,
     sourceCrsFallback: options.sourceCrsFallback,
   });
 

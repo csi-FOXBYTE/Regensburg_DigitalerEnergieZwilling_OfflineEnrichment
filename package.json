@@ -22,6 +22,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.3.3",
     "publint": "^0.3.18",
     "tsdown": "^0.21.0",
@@ -43,6 +44,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "dependencies": {
+    "better-sqlite3": "^11.10.0",
     "proj4": "^2.20.3",
     "proj4-list": "^1.0.4",
     "tiny-glob": "^0.2.9",

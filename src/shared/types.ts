@@ -100,4 +100,11 @@ export interface GeometryCrsOptions {
  *
  * @group Analysis
  */
-export interface ProcessCityJsonFilesOptions extends GeometryCrsOptions { }
+export interface ProcessCityJsonFilesOptions extends GeometryCrsOptions {
+  /** Output directory; writes in place when omitted. */
+  outDir?: string | undefined;
+  /** When true, runs the adjacency pass after indexing all buildings. */
+  adjacency?: boolean | undefined;
+  /** Maximum distance in metres between wall faces to count as adjacent. Defaults to 0.15. */
+  adjacencyTolerance?: number | undefined;
+}
