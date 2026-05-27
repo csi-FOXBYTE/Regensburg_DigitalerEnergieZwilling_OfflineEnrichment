@@ -18,6 +18,7 @@ FROM node:22-alpine AS runtime
 
 WORKDIR /app
 ENV NODE_ENV=production
+ENV SPATIALITE_PATH=/usr/lib/mod_spatialite.so.8
 
 RUN apk add --no-cache libspatialite
 

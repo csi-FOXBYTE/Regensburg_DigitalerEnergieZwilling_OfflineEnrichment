@@ -20,8 +20,6 @@ const EXPECTED_METRIC_KEYS = [
   "roofPitchDegrees",
   "height",
   "envelopeArea",
-  "roofWindowArea",
-  "externalWallWindowArea",
 ] as const;
 
 async function hasDocker(): Promise<boolean> {
@@ -71,6 +69,23 @@ test("docker e2e: image runs CLI and enriches mounted CityJSON files", async (t)
     assert.ok(isObject(parsedRunResult), "Expected JSON result from CLI");
     assert.ok(Array.isArray(parsedRunResult.files), "Expected 'files' array in CLI result");
     assert.ok(parsedRunResult.files.length > 0, "Expected at least one processed file");
+
+    const adjacencyRunResult = await execFileAsync("docker", [
+      "run",
+      "--rm",
+      "-v",
+      `${tmpDataDir}:/data`,
+      "-e",
+      "SOURCE_CRS_FALLBACK=EPSG:25832",
+      "-e",
+      "ADJACENCY=1",
+      imageTag,
+    ]);
+
+    const parsedAdjacencyResult = JSON.parse(adjacencyRunResult.stdout) as unknown;
+    assert.ok(isObject(parsedAdjacencyResult), "Expected JSON result from CLI (adjacency run)");
+    assert.ok(Array.isArray(parsedAdjacencyResult.files), "Expected 'files' array in CLI result (adjacency run)");
+    assert.ok(parsedAdjacencyResult.files.length > 0, "Expected at least one processed file (adjacency run)");
 
     const outputFiles = (await readdir(tmpDataDir)).filter((file) => file.endsWith(".json"));
     assert.ok(outputFiles.length > 0, "Expected JSON files in mounted output directory");

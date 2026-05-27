@@ -29,11 +29,7 @@ function ringToLineStringWkt(ring: Vertex[]): string {
 function loadSpatialite(db: Database.Database): void {
   const paths = process.env.SPATIALITE_PATH
     ? [process.env.SPATIALITE_PATH]
-    : [
-        "mod_spatialite",
-        "/usr/lib/x86_64-linux-gnu/mod_spatialite.so",
-        "/usr/lib/aarch64-linux-gnu/mod_spatialite.so",
-      ];
+    : ["mod_spatialite"];
 
   for (const path of paths) {
     try {
