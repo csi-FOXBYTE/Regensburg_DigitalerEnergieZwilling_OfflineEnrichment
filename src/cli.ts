@@ -16,6 +16,8 @@ interface CliOptions {
   adjacencyTolerance: number;
   /** Optional fallback for missing CRS information in the input. */
   sourceCrsFallback?: string | undefined;
+  /** When set, writes building addresses to a SQLite file at this path. */
+  addressOutput?: string | undefined;
 }
 
 /**
@@ -52,6 +54,7 @@ function parseCliOptions(): CliOptions {
   const adjacencyTolerance = parseFloat(readArg("--tolerance") ?? process.env.TOLERANCE ?? "0.15");
   const sourceCrsFallback =
     readArg("--source-crs-fallback") ?? process.env.SOURCE_CRS_FALLBACK;
+  const addressOutput = readArg("--address-output") ?? process.env.ADDRESS_OUTPUT;
 
   return {
     srcDir,
@@ -59,6 +62,7 @@ function parseCliOptions(): CliOptions {
     adjacency,
     adjacencyTolerance,
     sourceCrsFallback,
+    addressOutput,
   };
 }
 
@@ -69,14 +73,15 @@ function parseCliOptions(): CliOptions {
  */
 function printUsage(): void {
   console.log(`Usage:
-  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832]
+  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite]
 
 Environment alternatives:
   INPUT_DIR=/data
   OUTPUT_DIR=/data/output
   ADJACENCY=1
   TOLERANCE=0.15
-  SOURCE_CRS_FALLBACK=EPSG:25832`);
+  SOURCE_CRS_FALLBACK=EPSG:25832
+  ADDRESS_OUTPUT=/data/addresses.sqlite`);
 }
 
 /**
@@ -96,6 +101,7 @@ async function main(): Promise<void> {
     adjacency: options.adjacency,
     adjacencyTolerance: options.adjacencyTolerance,
     sourceCrsFallback: options.sourceCrsFallback,
+    addressOutput: options.addressOutput,
   });
 
   console.log(JSON.stringify(result, null, 2));

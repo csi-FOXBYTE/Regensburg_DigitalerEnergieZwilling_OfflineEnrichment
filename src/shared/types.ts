@@ -103,4 +103,6 @@ export interface ProcessCityJsonFilesOptions extends GeometryCrsOptions {
   adjacency?: boolean | undefined;
   /** Maximum distance in metres between wall faces to count as adjacent. Defaults to 0.15. */
   adjacencyTolerance?: number | undefined;
+  /** When set, writes building addresses to a SQLite file at this path. */
+  addressOutput?: string | undefined;
 }
