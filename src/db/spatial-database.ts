@@ -93,6 +93,15 @@ export function openSpatialDatabase(
       shared_wall_area REAL NOT NULL
     )
   `);
+  db.exec(`
+    CREATE TABLE age_zones (
+      id         INTEGER PRIMARY KEY,
+      dominant   TEXT NOT NULL,
+      lower_year INTEGER
+    )
+  `);
+  db.exec(`SELECT AddGeometryColumn('age_zones', 'geom', 25832, 'MULTIPOLYGON', 'XY')`);
+  db.exec(`SELECT CreateSpatialIndex('age_zones', 'geom')`);
 
   const stmtInsertBuilding = db.prepare<[string, string, string]>(`
     INSERT INTO buildings (id, file, type) VALUES (?, ?, ?)
@@ -131,6 +140,23 @@ export function openSpatialDatabase(
     FROM adjacencies
     WHERE building_a = ? OR building_b = ?
     GROUP BY buildingId
+  `);
+
+  const stmtInsertAgeZone = db.prepare<[string, number | null, Buffer]>(`
+    INSERT INTO age_zones (dominant, lower_year, geom)
+    VALUES (?, ?, ST_GeomFromWKB(?, 25832))
+  `);
+
+  const stmtGetConstructionYear = db.prepare<{ cx: number; cy: number }>(`
+    SELECT lower_year FROM age_zones
+    WHERE rowid IN (
+      SELECT ROWID FROM SpatialIndex
+      WHERE f_table_name      = 'age_zones'
+        AND f_geometry_column = 'geom'
+        AND search_frame      = MakePoint(:cx, :cy, 25832)
+    )
+    AND ST_Within(MakePoint(:cx, :cy, 25832), geom)
+    LIMIT 1
   `);
 
   return {
@@ -189,6 +215,32 @@ export function openSpatialDatabase(
      */
     getAdjacencies(buildingId: string): AdjacencyResult[] {
       return stmtGetAdjacencies.all(buildingId, buildingId, buildingId) as AdjacencyResult[];
+    },
+
+    /**
+     * Inserts one age zone from a pre-stripped WKB buffer. Called during the
+     * age zone import step before pass 1.
+     *
+     * @group Database
+     * @param dominant Raw `Dominant_Baualtersklasse` string.
+     * @param lowerYear Parsed lower bound year, or null for unknown ranges.
+     * @param wkb WKB geometry buffer with the GPKG header already removed.
+     */
+    addAgeZone(dominant: string, lowerYear: number | null, wkb: Buffer): void {
+      stmtInsertAgeZone.run(dominant, lowerYear, wkb);
+    },
+
+    /**
+     * Returns the construction year for the age zone containing the given point,
+     * or null if no zone matches.
+     *
+     * @group Database
+     * @param cx Easting in EPSG:25832.
+     * @param cy Northing in EPSG:25832.
+     */
+    getConstructionYear(cx: number, cy: number): number | null {
+      const row = stmtGetConstructionYear.get({ cx, cy }) as { lower_year: number | null } | undefined;
+      return row?.lower_year ?? null;
     },
 
     /**

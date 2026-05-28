@@ -5,6 +5,7 @@ WORKDIR /app
 RUN corepack enable
 
 RUN apk add --no-cache libspatialite
+ENV SPATIALITE_PATH=/usr/lib/mod_spatialite.so.8
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json tsdown.config.ts ./
 COPY src ./src

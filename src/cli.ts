@@ -18,6 +18,8 @@ interface CliOptions {
   sourceCrsFallback?: string | undefined;
   /** When set, writes building addresses to a SQLite file at this path. */
   addressOutput?: string | undefined;
+  /** When set, enriches buildings with construction year from the given GeoPackage. */
+  ageZonesFile?: string | undefined;
 }
 
 /**
@@ -55,6 +57,7 @@ function parseCliOptions(): CliOptions {
   const sourceCrsFallback =
     readArg("--source-crs-fallback") ?? process.env.SOURCE_CRS_FALLBACK;
   const addressOutput = readArg("--address-output") ?? process.env.ADDRESS_OUTPUT;
+  const ageZonesFile = readArg("--age-zones") ?? process.env.AGE_ZONES_FILE;
 
   return {
     srcDir,
@@ -63,6 +66,7 @@ function parseCliOptions(): CliOptions {
     adjacencyTolerance,
     sourceCrsFallback,
     addressOutput,
+    ageZonesFile,
   };
 }
 
@@ -73,7 +77,7 @@ function parseCliOptions(): CliOptions {
  */
 function printUsage(): void {
   console.log(`Usage:
-  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite]
+  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite] [--age-zones /data/Baualtersklassen.gpkg]
 
 Environment alternatives:
   INPUT_DIR=/data
@@ -81,7 +85,8 @@ Environment alternatives:
   ADJACENCY=1
   TOLERANCE=0.15
   SOURCE_CRS_FALLBACK=EPSG:25832
-  ADDRESS_OUTPUT=/data/addresses.sqlite`);
+  ADDRESS_OUTPUT=/data/addresses.sqlite
+  AGE_ZONES_FILE=/data/Baualtersklassen.gpkg`);
 }
 
 /**
@@ -102,6 +107,7 @@ async function main(): Promise<void> {
     adjacencyTolerance: options.adjacencyTolerance,
     sourceCrsFallback: options.sourceCrsFallback,
     addressOutput: options.addressOutput,
+    ageZonesFile: options.ageZonesFile,
   });
 
   console.log(JSON.stringify(result, null, 2));

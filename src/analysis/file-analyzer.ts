@@ -4,6 +4,7 @@ import { join, basename } from "node:path";
 import { listJsonFiles } from "../discovery/list-json-files.js";
 import { openAddressDatabase } from "../db/address-database.js";
 import type { AddressDatabase } from "../db/address-database.js";
+import { importAgeZonesFromGpkg } from "../db/age-zones-importer.js";
 import { openSpatialDatabase } from "../db/spatial-database.js";
 import { extractFacesFromGeometry } from "../geometry/face-extractor.js";
 import { normalizeVerticesForGeometry } from "../geometry/coordinate-normalization.js";
@@ -132,6 +133,41 @@ function indexAddressesFromFile(
   }
 }
 
+function enrichWithAgeZonesFromFile(
+  parsed: CityJSONV201,
+  options: ProcessCityJsonFilesOptions,
+  db: ReturnType<typeof openSpatialDatabase>,
+): void {
+  const vertices = normalizeVerticesForGeometry(parsed, options);
+
+  for (const [, cityObject] of Object.entries(parsed.CityObjects)) {
+    if (!isObject(cityObject)) continue;
+    if (cityObject.type !== "Building" && cityObject.type !== "BuildingPart") continue;
+
+    const geometries = Array.isArray(cityObject.geometry) ? cityObject.geometry : [];
+    const faces = geometries.flatMap((g) => extractFacesFromGeometry(g, vertices));
+    const center = groundBboxCenter(faces);
+    if (center === null) continue;
+    const [cx, cy] = center;
+
+    const constructionYear = db.getConstructionYear(cx, cy);
+    if (constructionYear === null) continue;
+
+    const existingAttributes = isObject(cityObject.attributes) ? cityObject.attributes : {};
+    const existingDet = isObject(existingAttributes.digitalEnergyTwin)
+      ? existingAttributes.digitalEnergyTwin
+      : {};
+
+    cityObject.attributes = {
+      ...existingAttributes,
+      digitalEnergyTwin: {
+        ...existingDet,
+        constructionYear,
+      },
+    };
+  }
+}
+
 async function* iterateValidFiles(
   filePaths: string[],
   files: CityJsonFileAnalysis[],
@@ -175,7 +211,12 @@ export async function processCityJsonFiles(
   options: ProcessCityJsonFilesOptions = {},
 ): Promise<CityJsonAnalysisResult> {
   const filePaths = await listJsonFiles(srcDir);
-  const { outDir, adjacency, adjacencyTolerance = DEFAULT_ADJACENCY_TOLERANCE_M, addressOutput } = options;
+  const { outDir, adjacency, adjacencyTolerance = DEFAULT_ADJACENCY_TOLERANCE_M, addressOutput, ageZonesFile } = options;
+  const needsSpatialDb = adjacency || ageZonesFile != null;
+  const shouldRunFirstPass = adjacency === true;
+  const shouldEnrichAgeZones = ageZonesFile != null;
+  const shouldEnrichAdjacency = adjacency === true;
+  const shouldExtractAddresses = addressOutput != null;
   const files: CityJsonFileAnalysis[] = [];
 
   let pass1FilePaths: string[] | null = null;
@@ -183,27 +224,36 @@ export async function processCityJsonFiles(
   let addressDb: AddressDatabase | null = null;
 
   try {
-    if (addressOutput != null) {
+    if (shouldExtractAddresses) {
       addressDb = openAddressDatabase(addressOutput);
     }
-    if (adjacency) {
-      db = openSpatialDatabase(wallFaceIntersectionArea);
-      pass1FilePaths = [];
 
-      for await (const { filePath, parsed } of iterateValidFiles(filePaths, files)) {
-        indexBuildingsIntoDb(parsed, filePath, db, options);
-        pass1FilePaths.push(filePath);
+    if (needsSpatialDb) {
+      db = openSpatialDatabase(wallFaceIntersectionArea);
+
+      if (shouldEnrichAgeZones) {
+        importAgeZonesFromGpkg(ageZonesFile, db);
       }
 
-      db.computeAdjacencies(adjacencyTolerance);
+      if (shouldRunFirstPass) {
+        pass1FilePaths = [];
+
+        for await (const { filePath, parsed } of iterateValidFiles(filePaths, files)) {
+          indexBuildingsIntoDb(parsed, filePath, db, options);
+          pass1FilePaths.push(filePath);
+        }
+
+        db.computeAdjacencies(adjacencyTolerance);
+      }
     }
 
     for await (const { filePath, parsed } of iterateValidFiles(pass1FilePaths ?? filePaths, files)) {
       let buildings: BuildingAnalysisResult[];
       try {
         buildings = analyzeBuildings(parsed, options);
-        if (db != null) enrichWithAdjacencies(parsed, db);
-        if (addressDb != null) indexAddressesFromFile(parsed, options, addressDb);
+        if (shouldEnrichAdjacency && db != null) enrichWithAdjacencies(parsed, db);
+        if (shouldEnrichAgeZones && db != null) enrichWithAgeZonesFromFile(parsed, options, db);
+        if (shouldExtractAddresses && addressDb != null) indexAddressesFromFile(parsed, options, addressDb);
       } catch (error) {
         const reason = error instanceof Error ? error.message : "Unknown geometry normalization error";
         files.push({ filePath, status: "skipped", reason });
