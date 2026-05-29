@@ -67,7 +67,7 @@ function enrichWithAdjacencies(
       ...existingAttributes,
       digitalEnergyTwin: {
         ...existingDet,
-        adjacentBuildings: adjacencies,
+        adjacentBuildings: JSON.stringify(adjacencies),
       },
     };
   }
