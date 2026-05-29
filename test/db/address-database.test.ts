@@ -90,19 +90,18 @@ test("db/address-database: streets are deduplicated across buildings", async () 
   });
 });
 
-test("db/address-database: duplicate building_id replaces the existing row", async () => {
+test("db/address-database: same building_id can have multiple address rows", async () => {
   await withTempDb(async (dbPath) => {
     const db = openAddressDatabase(dbPath);
     db.insertAddress("BLDG_1", "Maxstraße", "1", 1, 2);
-    db.insertAddress("BLDG_1", "Maxstraße", "1", 9, 10);
+    db.insertAddress("BLDG_1", "Maxstraße", "3", 3, 4);
     db.close();
 
     const raw = new Database(dbPath, { readonly: true });
-    const rows = raw.prepare(`SELECT cx, cy FROM building_addresses WHERE building_id = ?`).all("BLDG_1") as { cx: number; cy: number }[];
+    const rows = raw.prepare(`SELECT house_number FROM building_addresses WHERE building_id = ?`).all("BLDG_1") as { house_number: string }[];
     raw.close();
 
-    assert.equal(rows.length, 1, "expected exactly one row after replace");
-    assert.equal(rows[0]?.cx, 9);
-    assert.equal(rows[0]?.cy, 10);
+    assert.equal(rows.length, 2, "expected two rows for the same building_id");
+    assert.deepEqual(rows.map((r) => r.house_number), ["1", "3"]);
   });
 });

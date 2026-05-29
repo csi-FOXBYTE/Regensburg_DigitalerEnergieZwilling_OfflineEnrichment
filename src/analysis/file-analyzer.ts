@@ -94,15 +94,20 @@ function groundBboxCenter(faces: PolygonFace[]): [number, number] | null {
   return Number.isFinite(minX) ? [(minX + maxX) / 2, (minY + maxY) / 2] : null;
 }
 
-function parseThoroughfare(thoroughfare: string): { street: string; houseNumber: string | null } {
-  const i = thoroughfare.lastIndexOf(" ");
-  if (i >= 0) {
-    const suffix = thoroughfare.slice(i + 1);
-    if (/^\d/.test(suffix)) {
-      return { street: thoroughfare.slice(0, i), houseNumber: suffix };
+export function parseThoroughfare(thoroughfare: string): { street: string; houseNumber: string }[] {
+  const results: { street: string; houseNumber: string }[] = [];
+  for (const segment of thoroughfare.split(";")) {
+    const s = segment.trim();
+    const i = s.lastIndexOf(" ");
+    if (i < 0) continue;
+    const suffix = s.slice(i + 1);
+    if (!/^\d/.test(suffix)) continue;
+    const street = s.slice(0, i);
+    for (const hn of suffix.split(",")) {
+      results.push({ street, houseNumber: hn });
     }
   }
-  return { street: thoroughfare, houseNumber: null };
+  return results;
 }
 
 function indexAddressesFromFile(
@@ -126,8 +131,9 @@ function indexAddressesFromFile(
 
     for (const entry of addressEntries) {
       if (!isObject(entry) || typeof entry.ThoroughfareName !== "string") continue;
-      const { street, houseNumber } = parseThoroughfare(entry.ThoroughfareName);
-      addressDb.insertAddress(buildingId, street, houseNumber, cx, cy);
+      for (const { street, houseNumber } of parseThoroughfare(entry.ThoroughfareName)) {
+        addressDb.insertAddress(buildingId, street, houseNumber, cx, cy);
+      }
       break;
     }
   }

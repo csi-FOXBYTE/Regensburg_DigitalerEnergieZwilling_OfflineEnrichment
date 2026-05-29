@@ -19,12 +19,21 @@ export function openAddressDatabase(dbPath: string) {
   `);
   db.exec(`
     CREATE TABLE IF NOT EXISTS building_addresses (
-      building_id  TEXT PRIMARY KEY,
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      building_id  TEXT NOT NULL,
       street_id    INTEGER NOT NULL REFERENCES streets(id),
       house_number TEXT,
       cx           REAL NOT NULL,
       cy           REAL NOT NULL
     )
+  `);
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_building_addresses_building_id
+      ON building_addresses (building_id)
+  `);
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_building_addresses_street_house
+      ON building_addresses (street_id, house_number)
   `);
 
   const stmtInsertStreet = db.prepare<[string]>(
@@ -34,7 +43,7 @@ export function openAddressDatabase(dbPath: string) {
     `SELECT id FROM streets WHERE name = ?`,
   );
   const stmtInsertAddress = db.prepare<[string, number, string | null, number, number]>(
-    `INSERT OR REPLACE INTO building_addresses (building_id, street_id, house_number, cx, cy)
+    `INSERT INTO building_addresses (building_id, street_id, house_number, cx, cy)
      VALUES (?, ?, ?, ?, ?)`,
   );
 
