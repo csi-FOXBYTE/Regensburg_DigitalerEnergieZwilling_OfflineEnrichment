@@ -25,3 +25,36 @@ test("geometry/building-metrics: calculates envelope, areas and height", () => {
   assert.equal(metrics.roofPitchDegrees, 0);
   assert.ok(metrics.volume > 0);
 });
+
+test("geometry/building-metrics: preserves volume for a concave prism", () => {
+  const footprint: [number, number][] = [
+    [0, 0],
+    [3, 0],
+    [3, 3],
+    [2, 3],
+    [2, 1],
+    [1, 1],
+    [1, 3],
+    [0, 3],
+  ];
+  const bottom = footprint.map(([x, y]): [number, number, number] => [x, y, 0]);
+  const top = footprint.map(([x, y]): [number, number, number] => [x, y, 2]);
+  const prismFaces: PolygonFace[] = [
+    { semanticType: "GroundSurface", rings: [[...bottom].reverse()] },
+    { semanticType: "RoofSurface", rings: [top] },
+  ];
+
+  for (let i = 0; i < footprint.length; i += 1) {
+    const next = (i + 1) % footprint.length;
+    prismFaces.push({
+      semanticType: "WallSurface",
+      rings: [[bottom[i]!, bottom[next]!, top[next]!, top[i]!]],
+    });
+  }
+
+  const metrics = calculateBuildingGeometryMetrics(prismFaces);
+
+  assert.equal(metrics.groundArea, 7);
+  assert.equal(metrics.roofArea, 7);
+  assert.ok(Math.abs(metrics.volume - 14) < 1e-9);
+});
