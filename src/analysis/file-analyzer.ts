@@ -5,6 +5,7 @@ import { listJsonFiles } from "../discovery/list-json-files.js";
 import { openAddressDatabase } from "../db/address-database.js";
 import type { AddressDatabase } from "../db/address-database.js";
 import { importAgeZonesFromGpkg } from "../db/age-zones-importer.js";
+import { importGeothermalZonesFromGpkg } from "../db/geothermal-zones-importer.js";
 import { openSpatialDatabase } from "../db/spatial-database.js";
 import { extractFacesFromGeometry } from "../geometry/face-extractor.js";
 import { normalizeVerticesForGeometry } from "../geometry/coordinate-normalization.js";
@@ -174,6 +175,41 @@ function enrichWithAgeZonesFromFile(
   }
 }
 
+function enrichWithGeothermalZonesFromFile(
+  parsed: CityJSONV201,
+  options: ProcessCityJsonFilesOptions,
+  db: ReturnType<typeof openSpatialDatabase>,
+): void {
+  const vertices = normalizeVerticesForGeometry(parsed, options);
+
+  for (const cityObject of Object.values(parsed.CityObjects)) {
+    if (!isObject(cityObject)) continue;
+    if (cityObject.type !== "Building" && cityObject.type !== "BuildingPart") continue;
+
+    const geometries = Array.isArray(cityObject.geometry) ? cityObject.geometry : [];
+    const faces = geometries.flatMap((g) => extractFacesFromGeometry(g, vertices));
+    const center = groundBboxCenter(faces);
+    if (center === null) continue;
+    const [cx, cy] = center;
+
+    const geothermalEnergyAvailable = db.getGeothermalEnergyAvailability(cx, cy);
+    if (geothermalEnergyAvailable === null) continue;
+
+    const existingAttributes = isObject(cityObject.attributes) ? cityObject.attributes : {};
+    const existingDet = isObject(existingAttributes.digitalEnergyTwin)
+      ? existingAttributes.digitalEnergyTwin
+      : {};
+
+    cityObject.attributes = {
+      ...existingAttributes,
+      digitalEnergyTwin: {
+        ...existingDet,
+        geothermalEnergyAvailable,
+      },
+    };
+  }
+}
+
 async function* iterateValidFiles(
   filePaths: string[],
   files: CityJsonFileAnalysis[],
@@ -217,10 +253,18 @@ export async function processCityJsonFiles(
   options: ProcessCityJsonFilesOptions = {},
 ): Promise<CityJsonAnalysisResult> {
   const filePaths = await listJsonFiles(srcDir);
-  const { outDir, adjacency, adjacencyTolerance = DEFAULT_ADJACENCY_TOLERANCE_M, addressOutput, ageZonesFile } = options;
-  const needsSpatialDb = adjacency || ageZonesFile != null;
+  const {
+    outDir,
+    adjacency,
+    adjacencyTolerance = DEFAULT_ADJACENCY_TOLERANCE_M,
+    addressOutput,
+    ageZonesFile,
+    geothermalFile,
+  } = options;
+  const needsSpatialDb = adjacency || ageZonesFile != null || geothermalFile != null;
   const shouldRunFirstPass = adjacency === true;
   const shouldEnrichAgeZones = ageZonesFile != null;
+  const shouldEnrichGeothermal = geothermalFile != null;
   const shouldEnrichAdjacency = adjacency === true;
   const shouldExtractAddresses = addressOutput != null;
   const files: CityJsonFileAnalysis[] = [];
@@ -241,6 +285,10 @@ export async function processCityJsonFiles(
         importAgeZonesFromGpkg(ageZonesFile, db);
       }
 
+      if (shouldEnrichGeothermal) {
+        importGeothermalZonesFromGpkg(geothermalFile, db);
+      }
+
       if (shouldRunFirstPass) {
         pass1FilePaths = [];
 
@@ -259,6 +307,9 @@ export async function processCityJsonFiles(
         buildings = analyzeBuildings(parsed, options);
         if (shouldEnrichAdjacency && db != null) enrichWithAdjacencies(parsed, db);
         if (shouldEnrichAgeZones && db != null) enrichWithAgeZonesFromFile(parsed, options, db);
+        if (shouldEnrichGeothermal && db != null) {
+          enrichWithGeothermalZonesFromFile(parsed, options, db);
+        }
         if (shouldExtractAddresses && addressDb != null) indexAddressesFromFile(parsed, options, addressDb);
       } catch (error) {
         const reason = error instanceof Error ? error.message : "Unknown geometry normalization error";

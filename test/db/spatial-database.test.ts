@@ -36,10 +36,72 @@ function wallFace(x: number, yMin: number, yMax: number, zMin: number, zMax: num
   };
 }
 
+function multipolygonWkb(points: [number, number][]): Buffer {
+  const buffer = Buffer.alloc(9 + 9 + 4 + points.length * 16);
+  let offset = 0;
+
+  buffer.writeUInt8(1, offset);
+  offset += 1;
+  buffer.writeUInt32LE(6, offset);
+  offset += 4;
+  buffer.writeUInt32LE(1, offset);
+  offset += 4;
+
+  buffer.writeUInt8(1, offset);
+  offset += 1;
+  buffer.writeUInt32LE(3, offset);
+  offset += 4;
+  buffer.writeUInt32LE(1, offset);
+  offset += 4;
+  buffer.writeUInt32LE(points.length, offset);
+  offset += 4;
+
+  for (const [x, y] of points) {
+    buffer.writeDoubleLE(x, offset);
+    offset += 8;
+    buffer.writeDoubleLE(y, offset);
+    offset += 8;
+  }
+
+  return buffer;
+}
+
 test("db/spatial-database: database opens and schema initialises", (t) => {
   const db = tryOpenDatabase(() => 0);
   if (!db) { t.skip("SpatiaLite not available"); return; }
   db.close();
+});
+
+test("db/spatial-database: geothermal availability distinguishes matches from missing data", (t) => {
+  const db = tryOpenDatabase(() => 0);
+  if (!db) { t.skip("SpatiaLite not available"); return; }
+  try {
+    const availableZone = multipolygonWkb([
+      [0, 0],
+      [10, 0],
+      [10, 10],
+      [0, 10],
+      [0, 0],
+    ]);
+    const unavailableZone = multipolygonWkb([
+      [20, 20],
+      [30, 20],
+      [30, 30],
+      [20, 30],
+      [20, 20],
+    ]);
+
+    db.addGeothermalZones([
+      { category: "5-10_kW", available: true, wkb: availableZone },
+      { category: "<5_kW", available: false, wkb: unavailableZone },
+    ]);
+
+    assert.equal(db.getGeothermalEnergyAvailability(5, 5), true);
+    assert.equal(db.getGeothermalEnergyAvailability(25, 25), false);
+    assert.equal(db.getGeothermalEnergyAvailability(15, 15), null);
+  } finally {
+    db.close();
+  }
 });
 
 test("db/spatial-database: isolated building has no adjacencies", (t) => {

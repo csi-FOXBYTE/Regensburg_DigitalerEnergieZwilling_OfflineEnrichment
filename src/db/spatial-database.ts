@@ -22,6 +22,13 @@ interface WallFaceCandidate {
   verticesB: string;
 }
 
+/** A geothermal parcel prepared for insertion into the temporary database. */
+export interface GeothermalZoneInput {
+  category: string | null;
+  available: boolean;
+  wkb: Buffer;
+}
+
 function ringToLineStringWkt(ring: Vertex[]): string {
   return `LINESTRING(${ring.map(([x, y]) => `${x} ${y}`).join(", ")})`;
 }
@@ -102,6 +109,15 @@ export function openSpatialDatabase(
   `);
   db.exec(`SELECT AddGeometryColumn('age_zones', 'geom', 25832, 'MULTIPOLYGON', 'XY')`);
   db.exec(`SELECT CreateSpatialIndex('age_zones', 'geom')`);
+  db.exec(`
+    CREATE TABLE geothermal_zones (
+      id        INTEGER PRIMARY KEY,
+      category  TEXT,
+      available INTEGER NOT NULL CHECK (available IN (0, 1))
+    )
+  `);
+  db.exec(`SELECT AddGeometryColumn('geothermal_zones', 'geom', 25832, 'MULTIPOLYGON', 'XY')`);
+  db.exec(`SELECT CreateSpatialIndex('geothermal_zones', 'geom')`);
 
   const stmtInsertBuilding = db.prepare<[string, string, string]>(`
     INSERT INTO buildings (id, file, type) VALUES (?, ?, ?)
@@ -152,6 +168,28 @@ export function openSpatialDatabase(
     WHERE rowid IN (
       SELECT ROWID FROM SpatialIndex
       WHERE f_table_name      = 'age_zones'
+        AND f_geometry_column = 'geom'
+        AND search_frame      = MakePoint(:cx, :cy, 25832)
+    )
+    AND ST_Within(MakePoint(:cx, :cy, 25832), geom)
+    LIMIT 1
+  `);
+
+  const stmtInsertGeothermalZone = db.prepare<[string | null, number, Buffer]>(`
+    INSERT INTO geothermal_zones (category, available, geom)
+    VALUES (?, ?, ST_GeomFromWKB(?, 25832))
+  `);
+  const insertGeothermalZones = db.transaction((zones: Iterable<GeothermalZoneInput>) => {
+    for (const { category, available, wkb } of zones) {
+      stmtInsertGeothermalZone.run(category, available ? 1 : 0, wkb);
+    }
+  });
+
+  const stmtGetGeothermalAvailability = db.prepare<{ cx: number; cy: number }>(`
+    SELECT available FROM geothermal_zones
+    WHERE rowid IN (
+      SELECT ROWID FROM SpatialIndex
+      WHERE f_table_name      = 'geothermal_zones'
         AND f_geometry_column = 'geom'
         AND search_frame      = MakePoint(:cx, :cy, 25832)
     )
@@ -241,6 +279,31 @@ export function openSpatialDatabase(
     getConstructionYear(cx: number, cy: number): number | null {
       const row = stmtGetConstructionYear.get({ cx, cy }) as { lower_year: number | null } | undefined;
       return row?.lower_year ?? null;
+    },
+
+    /**
+     * Inserts geothermal zones in one transaction to keep large GeoPackage
+     * imports fast.
+     *
+     * @group Database
+     */
+    addGeothermalZones(zones: Iterable<GeothermalZoneInput>): void {
+      insertGeothermalZones(zones);
+    },
+
+    /**
+     * Returns groundwater heat-pump availability for the parcel containing the
+     * given point, or null if no imported parcel matches.
+     *
+     * @group Database
+     * @param cx Easting in EPSG:25832.
+     * @param cy Northing in EPSG:25832.
+     */
+    getGeothermalEnergyAvailability(cx: number, cy: number): boolean | null {
+      const row = stmtGetGeothermalAvailability.get({ cx, cy }) as
+        | { available: number }
+        | undefined;
+      return row == null ? null : row.available === 1;
     },
 
     /**

@@ -20,6 +20,8 @@ interface CliOptions {
   addressOutput?: string | undefined;
   /** When set, enriches buildings with construction year from the given GeoPackage. */
   ageZonesFile?: string | undefined;
+  /** When set, enriches buildings with groundwater heat-pump availability. */
+  geothermalFile?: string | undefined;
 }
 
 /**
@@ -58,6 +60,7 @@ function parseCliOptions(): CliOptions {
     readArg("--source-crs-fallback") ?? process.env.SOURCE_CRS_FALLBACK;
   const addressOutput = readArg("--address-output") ?? process.env.ADDRESS_OUTPUT;
   const ageZonesFile = readArg("--age-zones") ?? process.env.AGE_ZONES_FILE;
+  const geothermalFile = readArg("--geothermal") ?? process.env.GEOTHERMAL_FILE;
 
   return {
     srcDir,
@@ -67,6 +70,7 @@ function parseCliOptions(): CliOptions {
     sourceCrsFallback,
     addressOutput,
     ageZonesFile,
+    geothermalFile,
   };
 }
 
@@ -77,7 +81,7 @@ function parseCliOptions(): CliOptions {
  */
 function printUsage(): void {
   console.log(`Usage:
-  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite] [--age-zones /data/Baualtersklassen.gpkg]
+  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg]
 
 Environment alternatives:
   INPUT_DIR=/data
@@ -86,7 +90,8 @@ Environment alternatives:
   TOLERANCE=0.15
   SOURCE_CRS_FALLBACK=EPSG:25832
   ADDRESS_OUTPUT=/data/addresses.sqlite
-  AGE_ZONES_FILE=/data/Baualtersklassen.gpkg`);
+  AGE_ZONES_FILE=/data/Baualtersklassen.gpkg
+  GEOTHERMAL_FILE=/data/geothermal.gpkg`);
 }
 
 /**
@@ -108,6 +113,7 @@ async function main(): Promise<void> {
     sourceCrsFallback: options.sourceCrsFallback,
     addressOutput: options.addressOutput,
     ageZonesFile: options.ageZonesFile,
+    geothermalFile: options.geothermalFile,
   });
 
   console.log(JSON.stringify(result, null, 2));

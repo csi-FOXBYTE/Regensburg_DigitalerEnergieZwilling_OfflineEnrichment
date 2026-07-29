@@ -4,3 +4,4 @@ dist/
 csi-foxbyte-Regensburg*.tgz
 .env
 package-lock.json
+tmp/

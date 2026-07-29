@@ -90,6 +90,9 @@ Options:
 | `sourceCrsFallback` | `string` | Used when `metadata.referenceSystem` is missing. Supports EPSG and raw Proj4 strings. |
 | `outDir` | `string` | Write enriched files here instead of overwriting the originals. |
 | `adjacency` | `boolean` | Run the adjacency pass after indexing all buildings. |
+| `addressOutput` | `string` | Write extracted building addresses to this SQLite file. |
+| `ageZonesFile` | `string` | Enrich construction years from this GeoPackage. |
+| `geothermalFile` | `string` | Enrich groundwater heat-pump availability from `potenzial_ong_gwwp` in this GeoPackage. |
 
 Return shape:
 
@@ -120,6 +123,9 @@ Environment alternatives:
 | `--adjacency` | `ADJACENCY=1` | *(off)* |
 | `--tolerance` | `TOLERANCE` | `0.15` |
 | `--source-crs-fallback` | `SOURCE_CRS_FALLBACK` | *(none)* |
+| `--address-output` | `ADDRESS_OUTPUT` | *(none)* |
+| `--age-zones` | `AGE_ZONES_FILE` | *(none)* |
+| `--geothermal` | `GEOTHERMAL_FILE` | *(none)* |
 | *(SpatiaLite path)* | `SPATIALITE_PATH` | *(auto-detected)* |
 
 Example with environment variables:
@@ -173,6 +179,7 @@ For each analyzed building object:
       "envelopeArea": 0,
       "roofWindowArea": 0,
       "externalWallWindowArea": 0,
+      "geothermalEnergyAvailable": true,
       "adjacentBuildings": [
         { "buildingId": "DEBY_LOD2_12345", "sharedWallArea": 42.3 }
       ]
@@ -182,6 +189,9 @@ For each analyzed building object:
 ```
 
 `adjacentBuildings` is only present when the adjacency pass is enabled.
+`geothermalEnergyAvailable` is present when `geothermalFile` is set and the
+building center matches a parcel. The `5-10_kW` and higher capacity categories
+are available; lower, unavailable, and exclusion categories are not.
 
 ## Important Notes
 
@@ -203,4 +213,6 @@ For each analyzed building object:
 
 ## License
 
-MIT
+This project is licensed under the GNU Lesser General Public License,
+version 3 or (at your option) any later version (`LGPL-3.0-or-later`).
+See `LICENSE`, `COPYING.LESSER`, and `COPYING`.

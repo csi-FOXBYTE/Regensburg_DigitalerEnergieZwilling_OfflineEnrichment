@@ -107,4 +107,6 @@ export interface ProcessCityJsonFilesOptions extends GeometryCrsOptions {
   addressOutput?: string | undefined;
   /** When set, enriches buildings with construction year from the given GeoPackage. */
   ageZonesFile?: string | undefined;
+  /** When set, enriches buildings with groundwater heat-pump availability from the given GeoPackage. */
+  geothermalFile?: string | undefined;
 }
