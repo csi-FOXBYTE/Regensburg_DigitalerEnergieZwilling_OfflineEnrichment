@@ -21,6 +21,7 @@ import type {
 import type { CityJSONV201 } from "../types/cityjson_2_0_1.js";
 import { isCityJsonLike } from "../validation/cityjson.js";
 import { analyzeBuildings } from "./building-analyzer.js";
+import { filterCityObjectsByMunicipality } from "./municipality-filter.js";
 
 const DEFAULT_ADJACENCY_TOLERANCE_M = 0.15;
 
@@ -260,6 +261,7 @@ export async function processCityJsonFiles(
     addressOutput,
     ageZonesFile,
     geothermalFile,
+    municipalityKey,
   } = options;
   const needsSpatialDb = adjacency || ageZonesFile != null || geothermalFile != null;
   const shouldRunFirstPass = adjacency === true;
@@ -293,6 +295,9 @@ export async function processCityJsonFiles(
         pass1FilePaths = [];
 
         for await (const { filePath, parsed } of iterateValidFiles(filePaths, files)) {
+          if (municipalityKey != null) {
+            filterCityObjectsByMunicipality(parsed, municipalityKey);
+          }
           indexBuildingsIntoDb(parsed, filePath, db, options);
           pass1FilePaths.push(filePath);
         }
@@ -304,6 +309,9 @@ export async function processCityJsonFiles(
     for await (const { filePath, parsed } of iterateValidFiles(pass1FilePaths ?? filePaths, files)) {
       let buildings: BuildingAnalysisResult[];
       try {
+        if (municipalityKey != null) {
+          filterCityObjectsByMunicipality(parsed, municipalityKey);
+        }
         buildings = analyzeBuildings(parsed, options);
         if (shouldEnrichAdjacency && db != null) enrichWithAdjacencies(parsed, db);
         if (shouldEnrichAgeZones && db != null) enrichWithAgeZonesFromFile(parsed, options, db);

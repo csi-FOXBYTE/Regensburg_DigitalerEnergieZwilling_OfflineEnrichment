@@ -105,6 +105,8 @@ export interface ProcessCityJsonFilesOptions extends GeometryCrsOptions {
   adjacencyTolerance?: number | undefined;
   /** When set, writes building addresses to a SQLite file at this path. */
   addressOutput?: string | undefined;
+  /** Retain only CityObjects whose Gemeindeschluessel exactly matches this value. */
+  municipalityKey?: string | undefined;
   /** When set, enriches buildings with construction year from the given GeoPackage. */
   ageZonesFile?: string | undefined;
   /** When set, enriches buildings with groundwater heat-pump availability from the given GeoPackage. */

@@ -18,6 +18,8 @@ interface CliOptions {
   sourceCrsFallback?: string | undefined;
   /** When set, writes building addresses to a SQLite file at this path. */
   addressOutput?: string | undefined;
+  /** Retain only CityObjects whose Gemeindeschluessel exactly matches this value. */
+  municipalityKey?: string | undefined;
   /** When set, enriches buildings with construction year from the given GeoPackage. */
   ageZonesFile?: string | undefined;
   /** When set, enriches buildings with groundwater heat-pump availability. */
@@ -59,6 +61,7 @@ function parseCliOptions(): CliOptions {
   const sourceCrsFallback =
     readArg("--source-crs-fallback") ?? process.env.SOURCE_CRS_FALLBACK;
   const addressOutput = readArg("--address-output") ?? process.env.ADDRESS_OUTPUT;
+  const municipalityKey = readArg("--municipality-key") ?? process.env.MUNICIPALITY_KEY;
   const ageZonesFile = readArg("--age-zones") ?? process.env.AGE_ZONES_FILE;
   const geothermalFile = readArg("--geothermal") ?? process.env.GEOTHERMAL_FILE;
 
@@ -69,6 +72,7 @@ function parseCliOptions(): CliOptions {
     adjacencyTolerance,
     sourceCrsFallback,
     addressOutput,
+    municipalityKey,
     ageZonesFile,
     geothermalFile,
   };
@@ -81,7 +85,7 @@ function parseCliOptions(): CliOptions {
  */
 function printUsage(): void {
   console.log(`Usage:
-  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg]
+  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite] [--municipality-key 09362000] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg]
 
 Environment alternatives:
   INPUT_DIR=/data
@@ -90,6 +94,7 @@ Environment alternatives:
   TOLERANCE=0.15
   SOURCE_CRS_FALLBACK=EPSG:25832
   ADDRESS_OUTPUT=/data/addresses.sqlite
+  MUNICIPALITY_KEY=09362000
   AGE_ZONES_FILE=/data/Baualtersklassen.gpkg
   GEOTHERMAL_FILE=/data/geothermal.gpkg`);
 }
@@ -112,6 +117,7 @@ async function main(): Promise<void> {
     adjacencyTolerance: options.adjacencyTolerance,
     sourceCrsFallback: options.sourceCrsFallback,
     addressOutput: options.addressOutput,
+    municipalityKey: options.municipalityKey,
     ageZonesFile: options.ageZonesFile,
     geothermalFile: options.geothermalFile,
   });

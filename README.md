@@ -91,6 +91,7 @@ Options:
 | `outDir` | `string` | Write enriched files here instead of overwriting the originals. |
 | `adjacency` | `boolean` | Run the adjacency pass after indexing all buildings. |
 | `addressOutput` | `string` | Write extracted building addresses to this SQLite file. |
+| `municipalityKey` | `string` | Retain only CityObjects whose `Gemeindeschluessel` exactly matches this value. Objects without the attribute are excluded. |
 | `ageZonesFile` | `string` | Enrich construction years from this GeoPackage. |
 | `geothermalFile` | `string` | Enrich groundwater heat-pump availability from `potenzial_ong_gwwp` in this GeoPackage. |
 
@@ -124,6 +125,7 @@ Environment alternatives:
 | `--tolerance` | `TOLERANCE` | `0.15` |
 | `--source-crs-fallback` | `SOURCE_CRS_FALLBACK` | *(none)* |
 | `--address-output` | `ADDRESS_OUTPUT` | *(none)* |
+| `--municipality-key` | `MUNICIPALITY_KEY` | *(none)* |
 | `--age-zones` | `AGE_ZONES_FILE` | *(none)* |
 | `--geothermal` | `GEOTHERMAL_FILE` | *(none)* |
 | *(SpatiaLite path)* | `SPATIALITE_PATH` | *(auto-detected)* |
@@ -133,6 +135,10 @@ Example with environment variables:
 ```bash
 INPUT_DIR=./data OUTPUT_DIR=./output ADJACENCY=1 node dist/cli.mjs
 ```
+
+To restrict local CLI processing to the city of Regensburg, set
+`MUNICIPALITY_KEY=09362000` or pass `--municipality-key 09362000`. The same
+setting can be passed to the Docker container with `-e MUNICIPALITY_KEY=09362000`.
 
 ## Docker
 
