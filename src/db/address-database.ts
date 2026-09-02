@@ -19,14 +19,24 @@ export function openAddressDatabase(dbPath: string) {
   `);
   db.exec(`
     CREATE TABLE IF NOT EXISTS building_addresses (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      building_id  TEXT NOT NULL,
-      street_id    INTEGER NOT NULL REFERENCES streets(id),
-      house_number TEXT,
-      cx           REAL NOT NULL,
-      cy           REAL NOT NULL
+      id                INTEGER PRIMARY KEY AUTOINCREMENT,
+      building_id       TEXT NOT NULL,
+      street_id         INTEGER NOT NULL REFERENCES streets(id),
+      house_number      TEXT,
+      cx                REAL NOT NULL,
+      cy                REAL NOT NULL,
+      is_valid_building INTEGER NOT NULL CHECK (is_valid_building IN (0, 1))
     )
   `);
+
+  const addressColumns = db.pragma("table_info(building_addresses)") as { name: string }[];
+  if (!addressColumns.some(({ name }) => name === "is_valid_building")) {
+    db.exec(`
+      ALTER TABLE building_addresses
+        ADD COLUMN is_valid_building INTEGER NOT NULL DEFAULT 0
+          CHECK (is_valid_building IN (0, 1))
+    `);
+  }
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_building_addresses_building_id
       ON building_addresses (building_id)
@@ -42,9 +52,12 @@ export function openAddressDatabase(dbPath: string) {
   const stmtGetStreetId = db.prepare<[string]>(
     `SELECT id FROM streets WHERE name = ?`,
   );
-  const stmtInsertAddress = db.prepare<[string, number, string | null, number, number]>(
-    `INSERT INTO building_addresses (building_id, street_id, house_number, cx, cy)
-     VALUES (?, ?, ?, ?, ?)`,
+  const stmtInsertAddress = db.prepare<
+    [string, number, string | null, number, number, number]
+  >(
+    `INSERT INTO building_addresses
+       (building_id, street_id, house_number, cx, cy, is_valid_building)
+     VALUES (?, ?, ?, ?, ?, ?)`,
   );
 
   return {
@@ -59,10 +72,11 @@ export function openAddressDatabase(dbPath: string) {
       houseNumber: string | null,
       cx: number,
       cy: number,
+      isValidBuilding: boolean,
     ): void {
       stmtInsertStreet.run(street);
       const row = stmtGetStreetId.get(street) as { id: number };
-      stmtInsertAddress.run(buildingId, row.id, houseNumber, cx, cy);
+      stmtInsertAddress.run(buildingId, row.id, houseNumber, cx, cy, isValidBuilding ? 1 : 0);
     },
 
     /** Closes the database connection. */

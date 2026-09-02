@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseThoroughfare } from "../../src/analysis/file-analyzer.js";
+import { parseThoroughfare } from "../../src/config/adapters/buildingFeature.js";
 
 test("parseThoroughfare: single street and number", () => {
   assert.deepEqual(parseThoroughfare("Hauptstraße 5"), [{ street: "Hauptstraße", houseNumber: "5" }]);

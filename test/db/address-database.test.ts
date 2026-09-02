@@ -31,10 +31,45 @@ test("db/address-database: creates streets and building_addresses tables", async
   });
 });
 
+test("db/address-database: adds the validity flag to an existing address database", async () => {
+  await withTempDb(async (dbPath) => {
+    const legacy = new Database(dbPath);
+    legacy.exec(`
+      CREATE TABLE streets (
+        id   INTEGER PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE
+      );
+      CREATE TABLE building_addresses (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        building_id  TEXT NOT NULL,
+        street_id    INTEGER NOT NULL REFERENCES streets(id),
+        house_number TEXT,
+        cx           REAL NOT NULL,
+        cy           REAL NOT NULL
+      );
+      INSERT INTO streets (name) VALUES ('Altstadt');
+      INSERT INTO building_addresses (building_id, street_id, house_number, cx, cy)
+        VALUES ('LEGACY_1', 1, '1', 1, 2);
+    `);
+    legacy.close();
+
+    const db = openAddressDatabase(dbPath);
+    db.close();
+
+    const raw = new Database(dbPath, { readonly: true });
+    const row = raw
+      .prepare(`SELECT is_valid_building FROM building_addresses WHERE building_id = ?`)
+      .get("LEGACY_1") as { is_valid_building: number } | undefined;
+    raw.close();
+
+    assert.equal(row?.is_valid_building, 0);
+  });
+});
+
 test("db/address-database: insertAddress writes street and address rows", async () => {
   await withTempDb(async (dbPath) => {
     const db = openAddressDatabase(dbPath);
-    db.insertAddress("BLDG_1", "Maxstraße", "1", 700000.5, 5400000.5);
+    db.insertAddress("BLDG_1", "Maxstraße", "1", 700000.5, 5400000.5, true);
     db.close();
 
     const raw = new Database(dbPath, { readonly: true });
@@ -47,6 +82,7 @@ test("db/address-database: insertAddress writes street and address rows", async 
       house_number: string | null;
       cx: number;
       cy: number;
+      is_valid_building: number;
     } | undefined;
     raw.close();
 
@@ -55,13 +91,14 @@ test("db/address-database: insertAddress writes street and address rows", async 
     assert.equal(addr.house_number, "1");
     assert.equal(addr.cx, 700000.5);
     assert.equal(addr.cy, 5400000.5);
+    assert.equal(addr.is_valid_building, 1);
   });
 });
 
 test("db/address-database: null house_number is stored as NULL", async () => {
   await withTempDb(async (dbPath) => {
     const db = openAddressDatabase(dbPath);
-    db.insertAddress("BLDG_1", "Günzenried", null, 1, 2);
+    db.insertAddress("BLDG_1", "Günzenried", null, 1, 2, false);
     db.close();
 
     const raw = new Database(dbPath, { readonly: true });
@@ -75,8 +112,8 @@ test("db/address-database: null house_number is stored as NULL", async () => {
 test("db/address-database: streets are deduplicated across buildings", async () => {
   await withTempDb(async (dbPath) => {
     const db = openAddressDatabase(dbPath);
-    db.insertAddress("BLDG_1", "Maxstraße", "1", 1, 2);
-    db.insertAddress("BLDG_2", "Maxstraße", "3", 3, 4);
+    db.insertAddress("BLDG_1", "Maxstraße", "1", 1, 2, true);
+    db.insertAddress("BLDG_2", "Maxstraße", "3", 3, 4, false);
     db.close();
 
     const raw = new Database(dbPath, { readonly: true });
@@ -93,8 +130,8 @@ test("db/address-database: streets are deduplicated across buildings", async () 
 test("db/address-database: same building_id can have multiple address rows", async () => {
   await withTempDb(async (dbPath) => {
     const db = openAddressDatabase(dbPath);
-    db.insertAddress("BLDG_1", "Maxstraße", "1", 1, 2);
-    db.insertAddress("BLDG_1", "Maxstraße", "3", 3, 4);
+    db.insertAddress("BLDG_1", "Maxstraße", "1", 1, 2, true);
+    db.insertAddress("BLDG_1", "Maxstraße", "3", 3, 4, true);
     db.close();
 
     const raw = new Database(dbPath, { readonly: true });

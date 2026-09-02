@@ -25,12 +25,19 @@ test("address extraction: writes building_addresses rows for buildings with addr
     const db = new Database(addressOutput, { readonly: true });
     const rowCount = (db.prepare(`SELECT COUNT(*) AS n FROM building_addresses`).get() as { n: number }).n;
     const streetCount = (db.prepare(`SELECT COUNT(*) AS n FROM streets`).get() as { n: number }).n;
+    const validBuildingCount = (
+      db.prepare(`SELECT COUNT(*) AS n FROM building_addresses WHERE is_valid_building = 1`).get() as {
+        n: number;
+      }
+    ).n;
     db.close();
 
     // fixtures have 621 buildings with addresses; multi-number and semicolon entries add extra rows
     assert.ok(rowCount >= 621, `expected at least 621 address rows, got ${rowCount}`);
     assert.ok(streetCount > 0, "expected at least one street row");
     assert.ok(streetCount < rowCount, "expected street deduplication to reduce street count below address count");
+    assert.ok(validBuildingCount > 0, "expected valid address rows");
+    assert.ok(validBuildingCount < rowCount, "expected invalid address rows");
   } finally {
     await rm(tmpDir, { recursive: true, force: true });
   }
@@ -67,6 +74,13 @@ test("address extraction: splits ThoroughfareName into street and house_number",
       WHERE ba.building_id = 'DEBY_LOD2_6064661'
     `).get() as { house_number: string | null; street: string } | undefined;
 
+    const validityRows = db.prepare(`
+      SELECT building_id, is_valid_building
+      FROM building_addresses
+      WHERE building_id IN ('DEBY_LOD2_17737', 'DEBY_LOD2_17740')
+      ORDER BY building_id
+    `).all() as { building_id: string; is_valid_building: number }[];
+
     db.close();
 
     assert.ok(kapellenplatz, "DEBY_LOD2_17740 address row missing");
@@ -76,6 +90,10 @@ test("address extraction: splits ThoroughfareName into street and house_number",
     assert.ok(guenzenried, "DEBY_LOD2_6064661 address row missing");
     assert.equal(guenzenried.street, "Günzenried");
     assert.equal(guenzenried.house_number, "1a");
+    assert.deepEqual(validityRows, [
+      { building_id: "DEBY_LOD2_17737", is_valid_building: 0 },
+      { building_id: "DEBY_LOD2_17740", is_valid_building: 1 },
+    ]);
   } finally {
     await rm(tmpDir, { recursive: true, force: true });
   }

@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join, basename } from "node:path";
 
+import { adaptBuildingFeature } from "../config/adapters/buildingFeature.js";
 import { listJsonFiles } from "../discovery/list-json-files.js";
 import { openAddressDatabase } from "../db/address-database.js";
 import type { AddressDatabase } from "../db/address-database.js";
@@ -96,22 +97,6 @@ function groundBboxCenter(faces: PolygonFace[]): [number, number] | null {
   return Number.isFinite(minX) ? [(minX + maxX) / 2, (minY + maxY) / 2] : null;
 }
 
-export function parseThoroughfare(thoroughfare: string): { street: string; houseNumber: string }[] {
-  const results: { street: string; houseNumber: string }[] = [];
-  for (const segment of thoroughfare.split(";")) {
-    const s = segment.trim();
-    const i = s.lastIndexOf(" ");
-    if (i < 0) continue;
-    const suffix = s.slice(i + 1);
-    if (!/^\d/.test(suffix)) continue;
-    const street = s.slice(0, i);
-    for (const hn of suffix.split(",")) {
-      results.push({ street, houseNumber: hn });
-    }
-  }
-  return results;
-}
-
 function indexAddressesFromFile(
   parsed: CityJSONV201,
   options: ProcessCityJsonFilesOptions,
@@ -122,8 +107,8 @@ function indexAddressesFromFile(
   for (const [buildingId, cityObject] of Object.entries(parsed.CityObjects)) {
     if (!isObject(cityObject)) continue;
 
-    const addressEntries = Array.isArray(cityObject.address) ? cityObject.address : [];
-    if (addressEntries.length === 0) continue;
+    const adaptedFeature = adaptBuildingFeature(cityObject);
+    if (adaptedFeature.addresses.length === 0) continue;
 
     const geometries = Array.isArray(cityObject.geometry) ? cityObject.geometry : [];
     const faces = geometries.flatMap((g) => extractFacesFromGeometry(g, vertices));
@@ -131,12 +116,15 @@ function indexAddressesFromFile(
     if (center === null) continue;
     const [cx, cy] = center;
 
-    for (const entry of addressEntries) {
-      if (!isObject(entry) || typeof entry.ThoroughfareName !== "string") continue;
-      for (const { street, houseNumber } of parseThoroughfare(entry.ThoroughfareName)) {
-        addressDb.insertAddress(buildingId, street, houseNumber, cx, cy);
-      }
-      break;
+    for (const { street, houseNumber } of adaptedFeature.addresses) {
+      addressDb.insertAddress(
+        buildingId,
+        street,
+        houseNumber,
+        cx,
+        cy,
+        adaptedFeature.isValidBuilding,
+      );
     }
   }
 }
