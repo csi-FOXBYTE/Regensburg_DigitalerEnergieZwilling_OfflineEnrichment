@@ -1,0 +1,46 @@
+{
+  "additionalComponents": [
+    {
+      "type": "container",
+      "bom-ref": "oci:node:22-alpine",
+      "name": "node",
+      "version": "22-alpine (not digest pinned)",
+      "scope": "required",
+      "ecosystem": "OCI container",
+      "relationship": "referenced runtime/build software",
+      "metadataSource": "Dockerfile",
+      "notes": "Build/runtime base image; packages inside the base image are not expanded.",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT (Node.js); container includes additional licenses"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/nodejs/docker-node"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component:alpine:libspatialite@not-pinned",
+      "name": "libspatialite",
+      "version": "not pinned",
+      "scope": "required",
+      "ecosystem": "Alpine package",
+      "relationship": "referenced runtime/build software",
+      "metadataSource": "Dockerfile",
+      "notes": "Installed explicitly by apk in the builder and runtime images without a pinned package version; its transitive Alpine packages are not expanded.",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ]
+    }
+  ]
+}

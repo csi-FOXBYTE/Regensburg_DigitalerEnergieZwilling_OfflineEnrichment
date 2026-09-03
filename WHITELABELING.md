@@ -215,11 +215,15 @@ assert their literal values.
 
 ## 12. Regenerate the SBOM
 
-Regenerate `SBOM.cdx.json` and `SBOM.csv` after dependency, base-image, package,
-or version changes. The CycloneDX document should describe this repository as
-the root component, distinguish runtime and development dependencies, and list
-the Docker base image plus referenced system software that is not represented by
-the npm lockfile. Keep unresolved licenses explicit instead of guessing them.
+Run `pnpm run sbom` after dependency, base-image, package, or version changes.
+The repository script uses pnpm's native CycloneDX generator for the JavaScript
+dependency graph, then adds the non-npm components declared in `sbom.config.json`.
+That configuration currently covers the Docker base image and `libspatialite`,
+which npm metadata cannot describe. The script validates the component references
+and regenerates both `SBOM.cdx.json` and `SBOM.csv`.
+
+Keep `sbom.config.json` aligned with base images and explicitly installed Docker
+or system packages. Keep unresolved licenses explicit instead of guessing them.
 
 ## 13. Verify the whitelabel
 

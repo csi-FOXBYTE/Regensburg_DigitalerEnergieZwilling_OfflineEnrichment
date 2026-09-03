@@ -9,6 +9,7 @@
     "build": "pnpm run lint && pnpm run test && tsdown",
     "lint": "tsc --noEmit",
     "prepack": "pnpm run build",
+    "sbom": "node scripts/generate-sbom.mjs",
     "docs:api": "typedoc --options typedoc.json",
     "docs": "pnpm run docs:api"
   },

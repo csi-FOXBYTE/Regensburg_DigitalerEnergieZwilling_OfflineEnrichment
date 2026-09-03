@@ -70,6 +70,20 @@ Notes:
 - Requires Docker daemon access.
 - Runs only when explicitly invoked to keep default test runs fast.
 
+## Software bill of materials
+
+Regenerate both checked-in SBOM formats with pnpm 11 or newer and the installed
+dependency tree:
+
+```bash
+pnpm run sbom
+```
+
+The script uses pnpm's native CycloneDX 1.6 generator, adds the non-npm components
+declared in `sbom.config.json`, validates the component and dependency references,
+then writes `SBOM.cdx.json` and `SBOM.csv`. Keep that configuration synchronized
+with the Dockerfile's base images and explicitly installed system packages.
+
 ## Usage (Library)
 
 ```ts
