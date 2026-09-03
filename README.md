@@ -4,6 +4,10 @@ Offline enrichment tool for CityJSON files.
 
 API documentation: [`docs/api/README.md`](docs/api/README.md)
 
+Municipality adaptation guide: [`WHITELABELING.md`](WHITELABELING.md)
+
+Software bill of materials: [`SBOM.cdx.json`](SBOM.cdx.json) · [`SBOM.csv`](SBOM.csv)
+
 The tool scans a folder for `*.json`, validates CityJSON structure, computes building geometry metrics, and writes the metrics back into each `Building` / `BuildingPart` under `attributes.digitalEnergyTwin`. An optional adjacency pass detects shared walls between neighbouring buildings across tile boundaries and adds the results to the same attribute block.
 
 ## Features
@@ -25,8 +29,8 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
   - accepts EPSG forms (`EPSG:25832`, `EPSG::25832`, OGC EPSG URL, numeric code)
   - accepts raw Proj4 strings (`+proj=...`)
   - decodes CityJSON `transform` before calculations
-  - if source CRS is geographic, auto-selects UTM zone from dataset center
-  - if source CRS is missing, assumes lon/lat and auto-projects to inferred UTM
+  - transforms source coordinates into the projected CRS configured in `src/config/spatial.ts`
+  - if source CRS is missing, assumes WGS84 lon/lat and projects to the configured CRS
 - Optional adjacency pass (`--adjacency`):
   - indexes all `WallSurface` faces across all input files into a SpatiaLite database
   - uses an R\*Tree spatial index to find candidate wall face pairs within a configurable tolerance
@@ -91,9 +95,9 @@ Options:
 | `outDir` | `string` | Write enriched files here instead of overwriting the originals. |
 | `adjacency` | `boolean` | Run the adjacency pass after indexing all buildings. |
 | `addressOutput` | `string` | Write extracted building addresses to this SQLite file. |
-| `municipalityKey` | `string` | Retain only CityObjects whose `Gemeindeschluessel` exactly matches this value. Objects without the attribute are excluded. |
+| `municipalityKey` | `string` | Retain only CityObjects whose adapter-provided municipality key exactly matches this value. Objects without a key are excluded. |
 | `ageZonesFile` | `string` | Enrich construction years from this GeoPackage. |
-| `geothermalFile` | `string` | Enrich groundwater heat-pump availability from `potenzial_ong_gwwp` in this GeoPackage. |
+| `geothermalFile` | `string` | Enrich groundwater heat-pump availability from the configured GeoPackage layer. |
 
 Return shape:
 
@@ -196,20 +200,28 @@ For each analyzed building object:
 
 `adjacentBuildings` is only present when the adjacency pass is enabled.
 `geothermalEnergyAvailable` is present when `geothermalFile` is set and the
-building center matches a parcel. The `5-10_kW` and higher capacity categories
-are available; lower, unavailable, and exclusion categories are not.
+building center matches a parcel. The category mapping and availability
+threshold are configured in `src/config/geothermal.ts` and its importer.
+
+## Whitelabeling
+
+Municipality-specific building selection, coordinate-system, GeoPackage schema,
+and source-property assumptions are centralized under `src/config`. See
+[`WHITELABELING.md`](WHITELABELING.md) for the repository and cross-frontend
+adaptation checklist.
 
 ## Important Notes
 
 - Input files are rewritten in place unless `--out` is specified.
 - Non-CityJSON files are skipped.
 - Files with geometry/CRS issues are skipped with a reason in the result.
-- Coordinates are normalized before metric calculation.
-- The adjacency pass tolerance (currently 0.5 m) is pending confirmation from the customer.
+- Coordinates are normalized to the configured analysis CRS before metric calculation.
+- The adjacency pass tolerance defaults to 0.15 m.
 
 ## Project Structure
 
 - `src/analysis` — orchestration and file processing
+- `src/config` — municipality and dataset configuration plus source adapters
 - `src/db` — SpatiaLite spatial database for adjacency indexing
 - `src/discovery` — input file discovery
 - `src/geometry` — coordinate normalization and geometry math

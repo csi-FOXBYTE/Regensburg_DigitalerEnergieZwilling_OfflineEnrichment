@@ -6,7 +6,7 @@
 
 # Interface: GeometryCrsOptions
 
-Defined in: [shared/types.ts:89](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L89)
+Defined in: [shared/types.ts:89](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L89)
 
 Options for CRS handling during geometry operations.
 
@@ -20,6 +20,6 @@ Options for CRS handling during geometry operations.
 
 > `optional` **sourceCrsFallback**: `string`
 
-Defined in: [shared/types.ts:91](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L91)
+Defined in: [shared/types.ts:91](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L91)
 
-Fallback CRS when `metadata.referenceSystem` is missing.
+Source CRS fallback when `metadata.referenceSystem` is missing.

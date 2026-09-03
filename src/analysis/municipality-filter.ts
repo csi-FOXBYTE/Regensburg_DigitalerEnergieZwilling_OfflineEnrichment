@@ -1,3 +1,4 @@
+import { adaptMunicipalityKey } from "../config/adapters/buildingFeature.js";
 import { isObject } from "../shared/guards.js";
 import type { CityJSONV201 } from "../types/cityjson_2_0_1.js";
 
@@ -5,12 +6,12 @@ import type { CityJSONV201 } from "../types/cityjson_2_0_1.js";
  * Removes CityObjects outside the requested municipality and cleans references
  * to the removed CityObjects from the remaining document.
  *
- * CityObjects without a `Gemeindeschluessel` are excluded when this strict
- * filter is active, regardless of their type.
+ * CityObjects without an adapter-provided municipality key are excluded when
+ * this strict filter is active, regardless of their type.
  *
  * @group Analysis
  * @param cityJson Parsed CityJSON document to filter in place.
- * @param municipalityKey Exact `Gemeindeschluessel` value to retain.
+ * @param municipalityKey Exact adapter-provided municipality key to retain.
  */
 export function filterCityObjectsByMunicipality(
   cityJson: CityJSONV201,
@@ -22,9 +23,7 @@ export function filterCityObjectsByMunicipality(
   }
 
   for (const [cityObjectId, cityObject] of Object.entries(cityJson.CityObjects)) {
-    const attributes =
-      isObject(cityObject) && isObject(cityObject.attributes) ? cityObject.attributes : null;
-    if (attributes?.Gemeindeschluessel !== normalizedKey) {
+    if (!isObject(cityObject) || adaptMunicipalityKey(cityObject) !== normalizedKey) {
       delete cityJson.CityObjects[cityObjectId];
     }
   }

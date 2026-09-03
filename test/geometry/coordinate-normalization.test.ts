@@ -26,7 +26,7 @@ test("geometry/coordinate-normalization: keeps projected coordinates unchanged",
   assert.deepEqual(out[0], [450000, 5430000, 100]);
 });
 
-test("geometry/coordinate-normalization: infers UTM from lon/lat when CRS is missing", () => {
+test("geometry/coordinate-normalization: uses the configured analysis CRS when source CRS is missing", () => {
   const cityJson = createBaseCityJson([[12.1, 49.0, 300], [12.2, 49.1, 305]]);
 
   const out = normalizeVerticesForGeometry(cityJson as never);
@@ -39,4 +39,19 @@ test("geometry/coordinate-normalization: infers UTM from lon/lat when CRS is mis
   assert.ok(out[0]![0] > 100000);
   assert.ok(out[0]![1] > 1000000);
   assert.equal(out[0]![2], 300);
+});
+
+test("geometry/coordinate-normalization: transforms another projected CRS to the configured analysis CRS", () => {
+  const cityJson = {
+    ...createBaseCityJson([[1_346_966, 6_274_861, 300]]),
+    metadata: { referenceSystem: "EPSG:3857" },
+  };
+
+  const out = normalizeVerticesForGeometry(cityJson as never);
+
+  assert.equal(out.length, 1);
+  assert.ok(Number.isFinite(out[0]?.[0]));
+  assert.ok(Number.isFinite(out[0]?.[1]));
+  assert.notDeepEqual(out[0], cityJson.vertices[0]);
+  assert.equal(out[0]?.[2], 300);
 });

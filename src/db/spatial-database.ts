@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import Database from "better-sqlite3";
 
+import { spatialConfig } from "../config/spatial.js";
 import type { PolygonFace, Vertex } from "../shared/types.js";
 
 /**
@@ -67,6 +68,7 @@ function loadSpatialite(db: Database.Database): void {
 export function openSpatialDatabase(
   computeIntersectionArea: (a: Vertex[], b: Vertex[]) => number,
 ) {
+  const { srid } = spatialConfig;
   const tmpDir = mkdtempSync(join(tmpdir(), "spatialdb-"));
   const dbPath = join(tmpDir, "spatial.db");
 
@@ -91,7 +93,7 @@ export function openSpatialDatabase(
       vertices    TEXT NOT NULL
     )
   `);
-  db.exec(`SELECT AddGeometryColumn('wall_surfaces', 'bbox_xy', 25832, 'LINESTRING', 'XY')`);
+  db.exec(`SELECT AddGeometryColumn('wall_surfaces', 'bbox_xy', ${srid}, 'LINESTRING', 'XY')`);
   db.exec(`SELECT CreateSpatialIndex('wall_surfaces', 'bbox_xy')`);
   db.exec(`
     CREATE TABLE adjacencies (
@@ -107,7 +109,7 @@ export function openSpatialDatabase(
       lower_year INTEGER
     )
   `);
-  db.exec(`SELECT AddGeometryColumn('age_zones', 'geom', 25832, 'MULTIPOLYGON', 'XY')`);
+  db.exec(`SELECT AddGeometryColumn('age_zones', 'geom', ${srid}, 'MULTIPOLYGON', 'XY')`);
   db.exec(`SELECT CreateSpatialIndex('age_zones', 'geom')`);
   db.exec(`
     CREATE TABLE geothermal_zones (
@@ -116,7 +118,7 @@ export function openSpatialDatabase(
       available INTEGER NOT NULL CHECK (available IN (0, 1))
     )
   `);
-  db.exec(`SELECT AddGeometryColumn('geothermal_zones', 'geom', 25832, 'MULTIPOLYGON', 'XY')`);
+  db.exec(`SELECT AddGeometryColumn('geothermal_zones', 'geom', ${srid}, 'MULTIPOLYGON', 'XY')`);
   db.exec(`SELECT CreateSpatialIndex('geothermal_zones', 'geom')`);
 
   const stmtInsertBuilding = db.prepare<[string, string, string]>(`
@@ -125,7 +127,7 @@ export function openSpatialDatabase(
 
   const stmtInsertWallSurface = db.prepare<[string, string, string]>(`
     INSERT INTO wall_surfaces (building_id, vertices, bbox_xy)
-    VALUES (?, ?, GeomFromText(?, 25832))
+    VALUES (?, ?, GeomFromText(?, ${srid}))
   `);
 
   const stmtCandidates = dbRead.prepare<{ tol: number }>(`
@@ -160,7 +162,7 @@ export function openSpatialDatabase(
 
   const stmtInsertAgeZone = db.prepare<[string, number | null, Buffer]>(`
     INSERT INTO age_zones (dominant, lower_year, geom)
-    VALUES (?, ?, ST_GeomFromWKB(?, 25832))
+    VALUES (?, ?, ST_GeomFromWKB(?, ${srid}))
   `);
 
   const stmtGetConstructionYear = db.prepare<{ cx: number; cy: number }>(`
@@ -169,15 +171,15 @@ export function openSpatialDatabase(
       SELECT ROWID FROM SpatialIndex
       WHERE f_table_name      = 'age_zones'
         AND f_geometry_column = 'geom'
-        AND search_frame      = MakePoint(:cx, :cy, 25832)
+        AND search_frame      = MakePoint(:cx, :cy, ${srid})
     )
-    AND ST_Within(MakePoint(:cx, :cy, 25832), geom)
+    AND ST_Within(MakePoint(:cx, :cy, ${srid}), geom)
     LIMIT 1
   `);
 
   const stmtInsertGeothermalZone = db.prepare<[string | null, number, Buffer]>(`
     INSERT INTO geothermal_zones (category, available, geom)
-    VALUES (?, ?, ST_GeomFromWKB(?, 25832))
+    VALUES (?, ?, ST_GeomFromWKB(?, ${srid}))
   `);
   const insertGeothermalZones = db.transaction((zones: Iterable<GeothermalZoneInput>) => {
     for (const { category, available, wkb } of zones) {
@@ -191,9 +193,9 @@ export function openSpatialDatabase(
       SELECT ROWID FROM SpatialIndex
       WHERE f_table_name      = 'geothermal_zones'
         AND f_geometry_column = 'geom'
-        AND search_frame      = MakePoint(:cx, :cy, 25832)
+        AND search_frame      = MakePoint(:cx, :cy, ${srid})
     )
-    AND ST_Within(MakePoint(:cx, :cy, 25832), geom)
+    AND ST_Within(MakePoint(:cx, :cy, ${srid}), geom)
     LIMIT 1
   `);
 
@@ -260,7 +262,7 @@ export function openSpatialDatabase(
      * age zone import step before pass 1.
      *
      * @group Database
-     * @param dominant Raw `Dominant_Baualtersklasse` string.
+     * @param dominant Raw value from the configured age-zone classification column.
      * @param lowerYear Parsed lower bound year, or null for unknown ranges.
      * @param wkb WKB geometry buffer with the GPKG header already removed.
      */
@@ -273,8 +275,8 @@ export function openSpatialDatabase(
      * or null if no zone matches.
      *
      * @group Database
-     * @param cx Easting in EPSG:25832.
-     * @param cy Northing in EPSG:25832.
+     * @param cx X coordinate in the configured analysis CRS.
+     * @param cy Y coordinate in the configured analysis CRS.
      */
     getConstructionYear(cx: number, cy: number): number | null {
       const row = stmtGetConstructionYear.get({ cx, cy }) as { lower_year: number | null } | undefined;
@@ -296,8 +298,8 @@ export function openSpatialDatabase(
      * given point, or null if no imported parcel matches.
      *
      * @group Database
-     * @param cx Easting in EPSG:25832.
-     * @param cy Northing in EPSG:25832.
+     * @param cx X coordinate in the configured analysis CRS.
+     * @param cy Y coordinate in the configured analysis CRS.
      */
     getGeothermalEnergyAvailability(cx: number, cy: number): boolean | null {
       const row = stmtGetGeothermalAvailability.get({ cx, cy }) as

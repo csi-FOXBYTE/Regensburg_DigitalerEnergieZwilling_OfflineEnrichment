@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { adaptBuildingFeature } from "../../src/config/adapters/buildingFeature.js";
+import {
+  adaptBuildingFeature,
+  adaptMunicipalityKey,
+} from "../../src/config/adapters/buildingFeature.js";
 
 test("building feature adapter: extracts addresses and marks target functions valid", () => {
   assert.deepEqual(
@@ -32,4 +35,13 @@ test("building feature adapter: tolerates missing and differently shaped propert
     addresses: [],
     isValidBuilding: false,
   });
+});
+
+test("building feature adapter: extracts the configured source municipality key", () => {
+  assert.equal(
+    adaptMunicipalityKey({ attributes: { Gemeindeschluessel: "09362000" } }),
+    "09362000",
+  );
+  assert.equal(adaptMunicipalityKey({ attributes: { Gemeindeschluessel: 9362000 } }), undefined);
+  assert.equal(adaptMunicipalityKey({}), undefined);
 });

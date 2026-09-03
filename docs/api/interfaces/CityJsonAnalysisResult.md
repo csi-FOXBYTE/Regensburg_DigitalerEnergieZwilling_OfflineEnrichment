@@ -6,7 +6,7 @@
 
 # Interface: CityJsonAnalysisResult
 
-Defined in: [shared/types.ts:79](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L79)
+Defined in: [shared/types.ts:79](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L79)
 
 Aggregated result across all processed CityJSON files.
 
@@ -16,6 +16,6 @@ Aggregated result across all processed CityJSON files.
 
 > **files**: [`CityJsonFileAnalysis`](CityJsonFileAnalysis.md)[]
 
-Defined in: [shared/types.ts:81](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L81)
+Defined in: [shared/types.ts:81](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L81)
 
 Per-file results.

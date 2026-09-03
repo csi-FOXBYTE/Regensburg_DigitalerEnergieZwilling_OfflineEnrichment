@@ -6,7 +6,7 @@
 
 # Interface: BuildingAnalysisResult
 
-Defined in: [shared/types.ts:49](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L49)
+Defined in: [shared/types.ts:49](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L49)
 
 Analysis result for a single building object.
 
@@ -16,7 +16,7 @@ Analysis result for a single building object.
 
 > **buildingId**: `string`
 
-Defined in: [shared/types.ts:51](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L51)
+Defined in: [shared/types.ts:51](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L51)
 
 Unique CityObject ID.
 
@@ -26,7 +26,7 @@ Unique CityObject ID.
 
 > **buildingType**: `string`
 
-Defined in: [shared/types.ts:53](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L53)
+Defined in: [shared/types.ts:53](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L53)
 
 CityJSON object type, e.g. `Building` or `BuildingPart`.
 
@@ -36,6 +36,6 @@ CityJSON object type, e.g. `Building` or `BuildingPart`.
 
 > **metrics**: [`BuildingGeometryMetrics`](BuildingGeometryMetrics.md)
 
-Defined in: [shared/types.ts:55](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/ba08fb4f8cec76c2978818da233e983d31d1b7b5/src/shared/types.ts#L55)
+Defined in: [shared/types.ts:55](https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/blob/febf6e757a2cad6ca4eb875caf191f3e6ea0ad64/src/shared/types.ts#L55)
 
 Calculated geometric metrics.

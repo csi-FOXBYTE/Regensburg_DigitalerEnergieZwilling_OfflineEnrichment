@@ -1,3 +1,4 @@
+import { spatialConfig } from "./config/spatial.js";
 import { processCityJsonFiles } from "./index.js";
 
 /**
@@ -18,7 +19,7 @@ interface CliOptions {
   sourceCrsFallback?: string | undefined;
   /** When set, writes building addresses to a SQLite file at this path. */
   addressOutput?: string | undefined;
-  /** Retain only CityObjects whose Gemeindeschluessel exactly matches this value. */
+  /** Retain only CityObjects whose adapter-provided municipality key matches this value. */
   municipalityKey?: string | undefined;
   /** When set, enriches buildings with construction year from the given GeoPackage. */
   ageZonesFile?: string | undefined;
@@ -85,14 +86,14 @@ function parseCliOptions(): CliOptions {
  */
 function printUsage(): void {
   console.log(`Usage:
-  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback EPSG:25832] [--address-output /data/addresses.sqlite] [--municipality-key 09362000] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg]
+  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback ${spatialConfig.analysisCrs}] [--address-output /data/addresses.sqlite] [--municipality-key 09362000] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg]
 
 Environment alternatives:
   INPUT_DIR=/data
   OUTPUT_DIR=/data/output
   ADJACENCY=1
   TOLERANCE=0.15
-  SOURCE_CRS_FALLBACK=EPSG:25832
+  SOURCE_CRS_FALLBACK=${spatialConfig.analysisCrs}
   ADDRESS_OUTPUT=/data/addresses.sqlite
   MUNICIPALITY_KEY=09362000
   AGE_ZONES_FILE=/data/Baualtersklassen.gpkg

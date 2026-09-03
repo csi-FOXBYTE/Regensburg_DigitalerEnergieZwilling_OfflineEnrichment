@@ -1,6 +1,5 @@
 import { isObject } from "../../shared/guards.js";
-
-const SELECTABLE_BUILDING_FUNCTION_PREFIX = "31001_1000";
+import { buildingConfig } from "../building.js";
 
 export interface BuildingAddress {
   street: string;
@@ -48,6 +47,14 @@ function functionProperty(feature: Record<string, unknown>): unknown {
   return isObject(feature.attributes) ? feature.attributes.function : undefined;
 }
 
+/** Reads the municipality identifier used by the input CityJSON dataset. */
+export function adaptMunicipalityKey(feature: Record<string, unknown>): string | undefined {
+  if (!isObject(feature.attributes)) return undefined;
+
+  const municipalityKey = feature.attributes.Gemeindeschluessel;
+  return typeof municipalityKey === "string" ? municipalityKey : undefined;
+}
+
 /**
  * Converts municipality-specific CityJSON properties to the processing
  * contract. Other municipalities only need to replace the mappings here.
@@ -58,7 +65,7 @@ export function adaptBuildingFeature(feature: Record<string, unknown>): AdaptedB
   return {
     addresses: addressProperty(feature),
     isValidBuilding: String(buildingFunction ?? "").startsWith(
-      SELECTABLE_BUILDING_FUNCTION_PREFIX,
+      buildingConfig.selectableFunctionPrefix,
     ),
   };
 }

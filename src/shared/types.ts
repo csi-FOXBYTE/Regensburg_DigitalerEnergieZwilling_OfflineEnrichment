@@ -87,7 +87,7 @@ export interface CityJsonAnalysisResult {
  * @group Coordinate Reference System
  */
 export interface GeometryCrsOptions {
-  /** Fallback CRS when `metadata.referenceSystem` is missing. */
+  /** Source CRS fallback when `metadata.referenceSystem` is missing. */
   sourceCrsFallback?: string | undefined;
 }
 
@@ -105,7 +105,7 @@ export interface ProcessCityJsonFilesOptions extends GeometryCrsOptions {
   adjacencyTolerance?: number | undefined;
   /** When set, writes building addresses to a SQLite file at this path. */
   addressOutput?: string | undefined;
-  /** Retain only CityObjects whose Gemeindeschluessel exactly matches this value. */
+  /** Retain only CityObjects whose adapter-provided municipality key matches this value. */
   municipalityKey?: string | undefined;
   /** When set, enriches buildings with construction year from the given GeoPackage. */
   ageZonesFile?: string | undefined;
