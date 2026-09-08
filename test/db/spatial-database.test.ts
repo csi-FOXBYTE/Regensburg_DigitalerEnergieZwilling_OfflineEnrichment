@@ -4,6 +4,7 @@ import test from "node:test";
 import { openSpatialDatabase } from "../../src/db/spatial-database.js";
 import type { SpatialDatabase } from "../../src/db/spatial-database.js";
 import type { PolygonFace, Vertex } from "../../src/shared/types.js";
+import { wallFaceIntersectionArea } from "../../src/geometry/polygon-math.js";
 
 /**
  * Returns null and prints a warning if SpatiaLite is not available in this environment.
@@ -202,6 +203,22 @@ test("db/spatial-database: zero intersection area is not recorded", (t) => {
     db.computeAdjacencies(0.5);
 
     assert.deepEqual(db.getAdjacencies("a"), []);
+  } finally {
+    db.close();
+  }
+});
+
+test("db/spatial-database: forwards custom tolerance to wall-plane checks", () => {
+  const db = openSpatialDatabase(wallFaceIntersectionArea);
+  try {
+    db.addBuilding("a", "a.json", "Building");
+    db.addBuilding("b", "b.json", "Building");
+    db.addWallSurface("a", wallFace(0, 0, 1, 0, 3));
+    const opposing = wallFace(0.2, 0, 1, 0, 3);
+    opposing.rings[0]!.reverse();
+    db.addWallSurface("b", opposing);
+    db.computeAdjacencies(0.3);
+    assert.deepEqual(db.getAdjacencies("a"), [{ buildingId: "b", sharedWallArea: 3 }]);
   } finally {
     db.close();
   }

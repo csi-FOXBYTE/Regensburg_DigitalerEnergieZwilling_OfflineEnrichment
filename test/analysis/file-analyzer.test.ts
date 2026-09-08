@@ -12,11 +12,12 @@ function createSampleCityJson() {
     version: "2.0",
     transform: {
       scale: [1, 1, 1],
-      translate: [0, 0, 0],
+      translate: [0, 0, 350],
     },
     CityObjects: {
       b1: {
         type: "Building",
+        attributes: { NiedrigsteTraufeDesGebaeudes: "350.5" },
         geometry: [
           {
             type: "Solid",
@@ -40,6 +41,12 @@ function createSampleCityJson() {
               values: [[0, 1, 2, 2, 2, 2]],
             },
           },
+          {
+            type: "MultiSurface",
+            lod: "2.0",
+            boundaries: [[[8, 9, 10, 11]]],
+            semantics: { surfaces: [{ type: "RoofSurface" }], values: [0] },
+          },
         ],
       },
     },
@@ -52,6 +59,10 @@ function createSampleCityJson() {
       [1, 0, 1],
       [1, 1, 1],
       [0, 1, 1],
+      [10, 0, 0.1],
+      [10.25, 0, 0.1],
+      [10.25, 0.25, 0.1],
+      [10, 0.25, 0.1],
     ],
   };
 }
@@ -81,6 +92,10 @@ test("analysis/file-analyzer: enriches and writes digitalEnergyTwin attributes",
     assert.equal(typeof enriched?.volume, "number");
     assert.equal(typeof enriched?.groundArea, "number");
     assert.equal(typeof enriched?.envelopeArea, "number");
+    assert.equal(enriched.grossExternalWallArea, 4);
+    // The detached low canopy and global eaves attribute must not lower the split.
+    assert.equal(enriched.grossExternalWallAreaWithoutAttic, 4);
+    assert.equal(enriched.grossExternalWallAreaAttic, 0);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

@@ -1,5 +1,6 @@
 import type { BuildingGeometryMetrics, PolygonFace } from "../shared/types.js";
-import { polygonArea, polygonNormal, polygonSignedVolumeContribution } from "./polygon-math.js";
+import { polygonArea, polygonAreaBelowHeight, polygonNormal, polygonSignedVolumeContribution } from "./polygon-math.js";
+import { findRoofIslands } from "./roof-islands.js";
 
 /**
  * Computes building metrics from a set of polygonal faces.
@@ -15,6 +16,7 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
   let roofArea = 0;
   let roofPitchWeighted = 0;
   let roofPitchArea = 0;
+  const wallFaces: { face: PolygonFace; area: number }[] = [];
 
   let minGroundZ = Number.POSITIVE_INFINITY;
   let maxRoofZ = Number.NEGATIVE_INFINITY;
@@ -62,8 +64,21 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
 
       if (!normal || Math.abs(normal[2]) <= 0.2) {
         wallArea += area;
+        wallFaces.push({ face, area });
       }
     }
+  }
+
+  const splitHeight = findRoofIslands(faces)[0]?.minHeight;
+  let grossExternalWallAreaWithoutAttic: number | null = null;
+  let grossExternalWallAreaAttic: number | null = null;
+  if (splitHeight !== undefined && Number.isFinite(splitHeight)) {
+    grossExternalWallAreaWithoutAttic = Math.min(wallArea, wallFaces.reduce(
+      (sum, { face, area }) => sum + Math.min(area, polygonAreaBelowHeight(face.rings, splitHeight)),
+      0,
+    ));
+    // Preserve the original total even for slightly non-planar source polygons.
+    grossExternalWallAreaAttic = wallArea - grossExternalWallAreaWithoutAttic;
   }
 
   const volume = Math.abs(signedVolume);
@@ -77,6 +92,8 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
     groundArea,
     upperFloorArea,
     grossExternalWallArea: wallArea,
+    grossExternalWallAreaWithoutAttic,
+    grossExternalWallAreaAttic,
     roofArea,
     roofPitchDegrees,
     height,

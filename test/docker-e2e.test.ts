@@ -16,6 +16,8 @@ const EXPECTED_METRIC_KEYS = [
   "groundArea",
   "upperFloorArea",
   "grossExternalWallArea",
+  "grossExternalWallAreaWithoutAttic",
+  "grossExternalWallAreaAttic",
   "roofArea",
   "roofPitchDegrees",
   "height",

@@ -62,11 +62,11 @@ function loadSpatialite(db: Database.Database): void {
  * The temp file is deleted when {@link SpatialDatabase.close} is called.
  *
  * @group Database
- * @param computeIntersectionArea 3D wall-face intersection function supplied by the caller.
+ * @param computeIntersectionArea 3D wall-face intersection function receiving both faces and the adjacency tolerance.
  * @returns Database handle with methods for the three pipeline passes.
  */
 export function openSpatialDatabase(
-  computeIntersectionArea: (a: Vertex[], b: Vertex[]) => number,
+  computeIntersectionArea: (a: Vertex[], b: Vertex[], tolerance: number) => number,
 ) {
   const { srid } = spatialConfig;
   const tmpDir = mkdtempSync(join(tmpdir(), "spatialdb-"));
@@ -232,14 +232,14 @@ export function openSpatialDatabase(
      * connection inserts results — WAL mode allows both to proceed concurrently.
      *
      * @group Database
-     * @param tolerance Maximum bbox distance (metres) to consider a pair a candidate.
+     * @param tolerance Maximum XY distance and wall-plane separation in metres.
      */
     computeAdjacencies(tolerance: number): void {
       for (const candidate of stmtCandidates.iterate({ tol: tolerance })) {
         const { buildingA, buildingB, verticesA, verticesB } = candidate as WallFaceCandidate;
         const faceA = JSON.parse(verticesA) as Vertex[];
         const faceB = JSON.parse(verticesB) as Vertex[];
-        const area = computeIntersectionArea(faceA, faceB);
+        const area = computeIntersectionArea(faceA, faceB, tolerance);
         if (area > 0) {
           stmtInsertAdjacency.run(buildingA, buildingB, area);
         }

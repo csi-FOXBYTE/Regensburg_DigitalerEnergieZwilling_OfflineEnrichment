@@ -13,6 +13,8 @@ const EXPECTED_METRIC_KEYS = [
     "groundArea",
     "upperFloorArea",
     "grossExternalWallArea",
+    "grossExternalWallAreaWithoutAttic",
+    "grossExternalWallAreaAttic",
     "roofArea",
     "roofPitchDegrees",
     "height",
@@ -69,7 +71,8 @@ test("integration: enriches copied CityJSON files and validates output", async (
                     assert.ok(key in det, `Missing '${key}' in digitalEnergyTwin for '${id}'`);
 
                     const value: unknown = det[key];
-                    if (key === "roofPitchDegrees" || key === "height") {
+                    if (key === "roofPitchDegrees" || key === "height" ||
+                        key === "grossExternalWallAreaWithoutAttic" || key === "grossExternalWallAreaAttic") {
                         assert.ok(
                             typeof value === "number" || value === null,
                             `Expected number|null for '${key}' in '${id}'`,

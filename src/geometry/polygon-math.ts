@@ -82,6 +82,49 @@ export function polygonArea(rings: Vertex[][]): number {
   return Math.max(0, outerArea - holes);
 }
 
+/** Clips a ring to the horizontal half-space at or below the given elevation. */
+function clipRingBelowHeight(ring: Vertex[], height: number): Vertex[] {
+  const clipped: Vertex[] = [];
+
+  for (let i = 0; i < ring.length; i += 1) {
+    const current = ring[i]!;
+    const previous = ring[(i + ring.length - 1) % ring.length]!;
+    const currentInside = current[2] <= height;
+    const previousInside = previous[2] <= height;
+
+    if (currentInside !== previousInside) {
+      const t = (height - previous[2]) / (current[2] - previous[2]);
+      clipped.push([
+        previous[0] + t * (current[0] - previous[0]),
+        previous[1] + t * (current[1] - previous[1]),
+        height,
+      ]);
+    }
+    if (currentInside) clipped.push(current);
+  }
+
+  return clipped;
+}
+
+/**
+ * Computes the area at or below a horizontal cut, including clipped holes.
+ * Concave rings may become disconnected; their connecting cut edges cancel
+ * in Newell's area vector.
+ *
+ * @group Geometry
+ * @param rings Polygon rings, outer ring first.
+ * @param height Absolute elevation in the same coordinate system as the vertices.
+ * @returns Non-negative area below the cut.
+ */
+export function polygonAreaBelowHeight(rings: Vertex[][], height: number): number {
+  // Decoding a CityJSON transform can put an equal eaves elevation a few ULPs
+  // below the wall top. Avoid manufacturing a tiny attic strip in that case.
+  if (rings.every((ring) => ring.every((vertex) => vertex[2] <= height + 1e-9))) {
+    return polygonArea(rings);
+  }
+  return polygonArea(rings.map((ring) => clipRingBelowHeight(ring, height)));
+}
+
 /**
  * Computes a normalized face normal of a ring (Newell method).
  *
@@ -105,6 +148,11 @@ export function polygonSignedVolumeContribution(rings: Vertex[][]): number {
 }
 
 type Vec2 = [number, number];
+
+const MAX_OPPOSING_NORMAL_DEVIATION_RADIANS = Math.PI / 180;
+const OPPOSING_NORMAL_DOT_LIMIT = -Math.cos(MAX_OPPOSING_NORMAL_DEVIATION_RADIANS);
+const NORMAL_DOT_EPSILON = 1e-12;
+const PLANE_DISTANCE_EPSILON = 1e-9;
 
 function projectVertex(v: Vertex, u: Vertex, w: Vertex): Vec2 {
   return [dot(v, u), dot(v, w)];
@@ -169,25 +217,43 @@ function sutherlandHodgman(subject: Vec2[], clip: Vec2[]): Vec2[] {
 /**
  * Computes the shared area between two 3D wall face polygons using symmetric
  * projection onto the average plane of their normals followed by
- * Sutherland-Hodgman polygon clipping.
+ * Sutherland-Hodgman polygon clipping. Normals must oppose within 1 degree,
+ * and every vertex must lie within tolerance of the other face's plane.
  *
  * @group Geometry
  * @param faceA Outer ring vertices of the first wall face.
  * @param faceB Outer ring vertices of the second wall face.
+ * @param distanceTolerance Maximum separation from the other wall's plane in metres.
  * @returns Shared area in square units of the CRS, or 0 if the faces do not overlap.
  */
-export function wallFaceIntersectionArea(faceA: Vertex[], faceB: Vertex[]): number {
+export function wallFaceIntersectionArea(
+  faceA: Vertex[],
+  faceB: Vertex[],
+  distanceTolerance = 0.15,
+): number {
   const nA = polygonNormal(faceA);
   const nB = polygonNormal(faceB);
   if (!nA || !nB) return 0;
+
+  // Edge contact between perpendicular walls must not become projected overlap.
+  if (dot(nA, nB) > OPPOSING_NORMAL_DOT_LIMIT + NORMAL_DOT_EPSILON) return 0;
+
+  const originA = faceA[0]!;
+  const originB = faceB[0]!;
+  const maxDistance = distanceTolerance + PLANE_DISTANCE_EPSILON;
+  if (
+    faceA.some((v) => Math.abs(dot(vectorSubtract(v, originB), nB)) > maxDistance) ||
+    faceB.some((v) => Math.abs(dot(vectorSubtract(v, originA), nA)) > maxDistance)
+  ) return 0;
 
   // Adjacent wall faces have opposing normals; subtracting gives a stable average direction
   const nAvg = normalize(vectorSubtract(nA, nB));
   if (!nAvg) return 0;
 
   const [u, w] = localBasis(nAvg);
-  const projA = faceA.map((v) => projectVertex(v, u, w));
-  const projB = faceB.map((v) => projectVertex(v, u, w));
+  // Keep clipping coordinates local to avoid cancellation with large CRS coordinates.
+  const projA = faceA.map((v) => projectVertex(vectorSubtract(v, originA), u, w));
+  const projB = faceB.map((v) => projectVertex(vectorSubtract(v, originA), u, w));
 
   // Sutherland-Hodgman requires the clip polygon to be CCW
   const clipB = signedArea2d(projB) >= 0 ? projB : [...projB].reverse();

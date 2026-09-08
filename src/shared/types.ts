@@ -31,6 +31,10 @@ export interface BuildingGeometryMetrics {
   upperFloorArea: number;
   /** Gross external wall area. */
   grossExternalWallArea: number;
+  /** Gross wall area at or below the largest roof island's minimum elevation; null when no roof is available. */
+  grossExternalWallAreaWithoutAttic: number | null;
+  /** Gross wall area above the largest roof island's minimum elevation; null when no roof is available. */
+  grossExternalWallAreaAttic: number | null;
   /** Roof area. */
   roofArea: number;
   /** Area-weighted mean roof pitch in degrees. */

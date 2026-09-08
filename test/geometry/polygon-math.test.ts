@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { polygonArea, wallFaceIntersectionArea } from "../../src/geometry/polygon-math.js";
+import { polygonArea, polygonAreaBelowHeight, wallFaceIntersectionArea } from "../../src/geometry/polygon-math.js";
 import type { Vertex } from "../../src/shared/types.js";
 
 const CONCAVE_U_RING: Vertex[] = [
@@ -47,6 +47,36 @@ test("geometry/polygon-math: computes true 3D area of an inclined concave ring",
   assert.ok(Math.abs(polygonArea([inclined]) - 7 * Math.sqrt(2)) < EPSILON);
 });
 
+test("geometry/polygon-math: cuts a gable wall at its eaves and through its triangle", () => {
+  const gable: Vertex[] = [[0, 0, 0], [4, 0, 0], [4, 0, 2], [2, 0, 4], [0, 0, 2]];
+  for (const ring of [gable, [...gable].reverse(), [...gable, gable[0]!]]) {
+    assert.equal(polygonAreaBelowHeight([ring], 2), 8);
+    assert.equal(polygonAreaBelowHeight([ring], 3), 11);
+    assert.equal(polygonAreaBelowHeight([ring], 4), 12);
+    assert.equal(polygonAreaBelowHeight([ring], 5), 12);
+    assert.equal(polygonAreaBelowHeight([ring], 0), 0);
+    assert.equal(polygonAreaBelowHeight([ring], -1), 0);
+  }
+});
+
+test("geometry/polygon-math: subtracts the part of a hole below the cut", () => {
+  const outer: Vertex[] = [[0, 0, 0], [4, 0, 0], [4, 0, 4], [0, 0, 4]];
+  const hole: Vertex[] = [[1, 0, 1], [3, 0, 1], [3, 0, 3], [1, 0, 3]];
+  assert.equal(polygonAreaBelowHeight([outer, hole], 2), 6);
+  assert.equal(polygonAreaBelowHeight([outer, hole], 4), 12);
+});
+
+test("geometry/polygon-math: a cut can leave disconnected parts of a concave wall", () => {
+  const arch = CONCAVE_U_RING.map(([x, y]): Vertex => [x, 0, 3 - y]);
+  assert.equal(polygonAreaBelowHeight([arch], 2), 4);
+  assert.equal(polygonAreaBelowHeight([[...arch].reverse()], 2), 4);
+});
+
+test("geometry/polygon-math: height clipping keeps true 3D area for inclined surfaces", () => {
+  const inclined: Vertex[] = [[0, 0, 0], [4, 0, 0], [4, 4, 4], [0, 4, 4]];
+  assert.ok(Math.abs(polygonAreaBelowHeight([inclined], 2) - 8 * Math.sqrt(2)) < EPSILON);
+});
+
 test("geometry/polygon-math: fully overlapping wall faces return full area", () => {
   const area = wallFaceIntersectionArea(wallA(0, 1, 0, 3), wallB(0, 1, 0, 3));
   assert.ok(Math.abs(area - 3.0) < EPSILON, `Expected 3.0, got ${area}`);
@@ -80,4 +110,56 @@ test("geometry/polygon-math: result is symmetric regardless of which face is A o
   const ab = wallFaceIntersectionArea(fA, fB);
   const ba = wallFaceIntersectionArea(fB, fA);
   assert.ok(Math.abs(ab - ba) < EPSILON, `Expected symmetry: ${ab} vs ${ba}`);
+});
+
+test("geometry/polygon-math: perpendicular walls touching along an edge have no shared area", () => {
+  const a: Vertex[] = [[0, 0, 0], [0, 10, 0], [0, 10, 3], [0, 0, 3]];
+  const b: Vertex[] = [[10, 0, 0], [0, 0, 0], [0, 0, 3], [10, 0, 3]];
+  assert.equal(wallFaceIntersectionArea(a, b), 0);
+  assert.equal(wallFaceIntersectionArea(b, a), 0);
+});
+
+test("geometry/polygon-math: coplanar walls touching only along an edge have no shared area", () => {
+  assert.equal(wallFaceIntersectionArea(wallA(0, 1, 0, 3), wallB(1, 2, 0, 3)), 0);
+});
+
+test("geometry/polygon-math: walls with the same outward normal have no shared area", () => {
+  assert.equal(wallFaceIntersectionArea(wallA(0, 1, 0, 3), wallA(0, 1, 0, 3)), 0);
+});
+
+test("geometry/polygon-math: separated parallel walls respect the distance tolerance", () => {
+  const a = wallA(0, 1, 0, 3);
+  const b = wallB(0, 1, 0, 3).map(([x, y, z]): Vertex => [x + 0.2, y, z]);
+  assert.equal(wallFaceIntersectionArea(a, b), 0);
+  assert.equal(wallFaceIntersectionArea(b, a), 0);
+  assert.equal(wallFaceIntersectionArea(a, b, 0.3), 3);
+  assert.equal(wallFaceIntersectionArea(b, a, 0.3), 3);
+  assert.equal(wallFaceIntersectionArea(a, b, 0.2), 3);
+});
+
+test("geometry/polygon-math: accepts a small angular deviation but rejects more than one degree", () => {
+  const a = wallA(0, 1, 0, 3);
+  for (const degrees of [0.5, 1, 1.1, 2]) {
+    const angle = degrees * Math.PI / 180;
+    const b = wallB(0, 1, 0, 3).map(([, y, z]): Vertex => [1 - y * Math.sin(angle), y * Math.cos(angle), z]);
+    const expected = degrees <= 1 ? 3 * Math.cos(angle / 2) : 0;
+    assert.ok(Math.abs(wallFaceIntersectionArea(a, b) - expected) < EPSILON, `${degrees} degrees`);
+    assert.ok(Math.abs(wallFaceIntersectionArea(b, a) - expected) < EPSILON, `${degrees} degrees reversed`);
+  }
+});
+
+test("geometry/polygon-math: near-parallel walls diverging beyond tolerance have no shared area", () => {
+  const a = wallA(0, 40, 0, 3);
+  const angle = 0.5 * Math.PI / 180;
+  const b = wallB(0, 40, 0, 3).map(([, y, z]): Vertex => [1 - y * Math.sin(angle), y * Math.cos(angle), z]);
+  assert.equal(wallFaceIntersectionArea(a, b), 0);
+  assert.equal(wallFaceIntersectionArea(b, a), 0);
+});
+
+test("geometry/polygon-math: staggered overlap remains accurate at large CRS coordinates", () => {
+  const translate = ([x, y, z]: Vertex): Vertex => [x + 720000, y + 5432000, z + 350];
+  const a = wallA(0, 4, 0, 1).map(translate);
+  const b = wallB(2, 6, 0, 1).map(translate);
+  assert.equal(wallFaceIntersectionArea(a, b), 2);
+  assert.equal(wallFaceIntersectionArea(b, a), 2);
 });

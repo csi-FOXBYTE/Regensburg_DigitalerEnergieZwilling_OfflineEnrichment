@@ -19,6 +19,8 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
   - `groundArea`
   - `upperFloorArea`
   - `grossExternalWallArea`
+  - `grossExternalWallAreaWithoutAttic`
+  - `grossExternalWallAreaAttic`
   - `roofArea`
   - `roofPitchDegrees`
   - `height`
@@ -34,6 +36,7 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
 - Optional adjacency pass (`--adjacency`):
   - indexes all `WallSurface` faces across all input files into a SpatiaLite database
   - uses an R\*Tree spatial index to find candidate wall face pairs within a configurable tolerance
+  - requires outward normals to oppose within 1° and every vertex to lie within the configured tolerance of the other wall's plane
   - computes the actual shared wall area via symmetric 3D polygon intersection (Sutherland-Hodgman on the average projection plane)
   - handles cross-tile adjacencies — buildings near a tile edge are correctly matched against buildings in neighbouring tiles
 - Output written in place or to a separate output directory (`--out`)
@@ -197,6 +200,8 @@ For each analyzed building object:
       "groundArea": 0,
       "upperFloorArea": 0,
       "grossExternalWallArea": 0,
+      "grossExternalWallAreaWithoutAttic": 0,
+      "grossExternalWallAreaAttic": 0,
       "roofArea": 0,
       "roofPitchDegrees": 0,
       "height": 0,
@@ -213,6 +218,26 @@ For each analyzed building object:
 ```
 
 `adjacentBuildings` is only present when the adjacency pass is enabled.
+
+`grossExternalWallArea` remains the full gross wall area. Its two components,
+`grossExternalWallAreaWithoutAttic` and `grossExternalWallAreaAttic`, split the
+wall polygons horizontally at the lowest elevation of the largest connected
+roof island. Roof faces connect through shared 3D boundary segments within
+1 cm, including partially shared or subdivided edges. Point-only contact and
+connections through walls do not join islands. The largest island is selected
+by its combined surface area after subtracting polygon holes; equal-area
+islands are ordered by their lowest elevation. No percentage threshold is used.
+The global `NiedrigsteTraufeDesGebaeudes` attribute does not set this split,
+because it may refer to a separate low canopy. If no usable roof faces are
+available, both split values are `null`.
+
+The area without attic includes the portion at or below the cut; attic area is
+the remainder above it. The two values sum to the unchanged gross wall area.
+Eaves at or above the highest wall vertex give exactly zero attic wall area,
+including flat-roof buildings. Both values include shared walls and window/door
+areas unless openings are explicitly represented as polygon holes. Shared-wall
+overlap remains a total for the entire wall and is not split by attic height.
+
 `geothermalEnergyAvailable` is present when `geothermalFile` is set and the
 building center matches a parcel. The category mapping and availability
 threshold are configured in `src/config/geothermal.ts` and its importer.

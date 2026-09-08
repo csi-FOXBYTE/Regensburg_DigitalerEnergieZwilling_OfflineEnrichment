@@ -52,6 +52,30 @@ Gross external wall area.
 
 ***
 
+### grossExternalWallAreaWithoutAttic
+
+> **grossExternalWallAreaWithoutAttic**: `number` \| `null`
+
+Defined in: [shared/types.ts](../../../src/shared/types.ts)
+
+Gross wall area at or below the largest roof island's minimum elevation; null when no roof is available.
+Roof islands connect through shared 3D edge segments within 1 cm and are ranked
+by combined surface area.
+
+***
+
+### grossExternalWallAreaAttic
+
+> **grossExternalWallAreaAttic**: `number` \| `null`
+
+Defined in: [shared/types.ts](../../../src/shared/types.ts)
+
+Gross wall area above the largest roof island's minimum elevation; null when no roof is available.
+Zero when the eaves are at or above the highest wall vertex. Together with
+`grossExternalWallAreaWithoutAttic`, this equals `grossExternalWallArea`.
+
+***
+
 ### roofArea
 
 > **roofArea**: `number`
