@@ -106,6 +106,18 @@ Building height as the difference between minimum ground Z and maximum roof Z.
 
 ***
 
+### lowestEavesHeight
+
+> **lowestEavesHeight**: `number` \| `null`
+
+Defined in: [shared/types.ts](../../../src/shared/types.ts)
+
+Lowest elevation of the largest connected roof island, relative to the building's
+lowest `GroundSurface` elevation, in metres. This uses the same ground reference
+as `height`. Null if either a usable roof island or ground elevation is unavailable.
+
+***
+
 ### envelopeArea
 
 > **envelopeArea**: `number`

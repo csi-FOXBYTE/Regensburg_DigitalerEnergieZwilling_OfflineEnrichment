@@ -85,6 +85,9 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
   const upperFloorArea = groundArea;
   const roofPitchDegrees = roofPitchArea > 0 ? roofPitchWeighted / roofPitchArea : null;
   const height = Number.isFinite(minGroundZ) && Number.isFinite(maxRoofZ) ? maxRoofZ - minGroundZ : null;
+  const lowestEavesHeight = splitHeight !== undefined && Number.isFinite(splitHeight) && Number.isFinite(minGroundZ)
+    ? splitHeight - minGroundZ
+    : null;
   const envelopeArea = groundArea + wallArea + roofArea;
 
   return {
@@ -97,6 +100,7 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
     roofArea,
     roofPitchDegrees,
     height,
+    lowestEavesHeight,
     envelopeArea,
   };
 }

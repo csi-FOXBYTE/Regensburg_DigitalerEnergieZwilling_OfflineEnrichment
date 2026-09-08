@@ -21,6 +21,7 @@ const EXPECTED_METRIC_KEYS = [
   "roofArea",
   "roofPitchDegrees",
   "height",
+  "lowestEavesHeight",
   "envelopeArea",
 ] as const;
 

@@ -24,6 +24,7 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
   - `roofArea`
   - `roofPitchDegrees`
   - `height`
+  - `lowestEavesHeight`
   - `envelopeArea`
   - `roofWindowArea`
   - `externalWallWindowArea`
@@ -205,6 +206,7 @@ For each analyzed building object:
       "roofArea": 0,
       "roofPitchDegrees": 0,
       "height": 0,
+      "lowestEavesHeight": 0,
       "envelopeArea": 0,
       "roofWindowArea": 0,
       "externalWallWindowArea": 0,
@@ -230,6 +232,13 @@ islands are ordered by their lowest elevation. No percentage threshold is used.
 The global `NiedrigsteTraufeDesGebaeudes` attribute does not set this split,
 because it may refer to a separate low canopy. If no usable roof faces are
 available, both split values are `null`.
+
+`lowestEavesHeight` exports this selected roof island's lowest elevation **relative
+to the building's lowest ground elevation**, in metres. It equals the absolute
+wall split elevation minus the minimum `GroundSurface` vertex elevation, using
+the same ground reference as `height`. It is `null` if either a usable roof
+island or ground elevation is unavailable. The wall split itself continues to
+use the absolute elevation internally.
 
 The area without attic includes the portion at or below the cut; attic area is
 the remainder above it. The two values sum to the unchanged gross wall area.

@@ -41,6 +41,8 @@ export interface BuildingGeometryMetrics {
   roofPitchDegrees: number | null;
   /** Building height as the difference between minimum ground Z and maximum roof Z. */
   height: number | null;
+  /** Largest roof island's minimum elevation minus the lowest GroundSurface elevation, in metres; null if either is unavailable. */
+  lowestEavesHeight: number | null;
   /** Envelope area from ground, wall, and roof surfaces. */
   envelopeArea: number;
 }

@@ -24,6 +24,7 @@ test("geometry/building-metrics: calculates envelope, areas and height", () => {
   assert.equal(metrics.grossExternalWallAreaAttic, 0);
   assert.equal(metrics.envelopeArea, 10);
   assert.equal(metrics.height, 2);
+  assert.equal(metrics.lowestEavesHeight, 2);
   assert.equal(metrics.roofPitchDegrees, 0);
   assert.ok(metrics.volume > 0);
 });
@@ -129,4 +130,35 @@ test("geometry/building-metrics: the split uses the same wall filter as the orig
   assert.equal(metrics.grossExternalWallArea, 12);
   assert.equal(metrics.grossExternalWallAreaWithoutAttic, 8);
   assert.equal(metrics.grossExternalWallAreaAttic, 4);
+});
+
+test("geometry/building-metrics: exports the main roof eaves relative to the lowest ground elevation", () => {
+  const ground: PolygonFace = {
+    semanticType: "GroundSurface",
+    rings: [[[0, 0, 0], [4, 0, 1], [4, 3, 1], [0, 3, 0]]],
+  };
+  const canopy: PolygonFace = {
+    semanticType: "RoofSurface",
+    rings: [[[10, 0, 0.5], [11, 0, 0.5], [11, 1, 0.5], [10, 1, 0.5]]],
+  };
+  for (const elevationOffset of [0, 350]) {
+    const translated = [ground, canopy, ...gableFaces].map((face): PolygonFace => ({
+      ...face,
+      rings: face.rings.map((ring) => ring.map(([x, y, z]) => [x, y, z + elevationOffset])),
+    }));
+    const metrics = calculateBuildingGeometryMetrics(translated);
+    assert.equal(metrics.lowestEavesHeight, 2);
+    assert.equal(metrics.height, 4);
+    assert.equal(metrics.grossExternalWallAreaWithoutAttic, 8);
+    assert.equal(metrics.grossExternalWallAreaAttic, 4);
+  }
+});
+
+test("geometry/building-metrics: eaves height is null when ground or roof is missing", () => {
+  const withoutGround = calculateBuildingGeometryMetrics(gableFaces);
+  assert.equal(withoutGround.lowestEavesHeight, null);
+  assert.equal(withoutGround.grossExternalWallAreaAttic, 4);
+
+  const withoutRoof = calculateBuildingGeometryMetrics(faces.filter((face) => face.semanticType !== "RoofSurface"));
+  assert.equal(withoutRoof.lowestEavesHeight, null);
 });

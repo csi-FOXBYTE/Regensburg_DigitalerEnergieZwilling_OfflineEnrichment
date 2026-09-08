@@ -96,6 +96,8 @@ test("analysis/file-analyzer: enriches and writes digitalEnergyTwin attributes",
     // The detached low canopy and global eaves attribute must not lower the split.
     assert.equal(enriched.grossExternalWallAreaWithoutAttic, 4);
     assert.equal(enriched.grossExternalWallAreaAttic, 0);
+    assert.equal(enriched.lowestEavesHeight, 1);
+    assert.equal(result.files[0]?.buildings?.[0]?.metrics.lowestEavesHeight, 1);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
