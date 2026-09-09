@@ -4,7 +4,6 @@ import test from "node:test";
 import { openSpatialDatabase } from "../../src/db/spatial-database.js";
 import type { SpatialDatabase } from "../../src/db/spatial-database.js";
 import type { PolygonFace, Vertex } from "../../src/shared/types.js";
-import { wallFaceIntersectionArea } from "../../src/geometry/polygon-math.js";
 
 /**
  * Returns null and prints a warning if SpatiaLite is not available in this environment.
@@ -12,7 +11,7 @@ import { wallFaceIntersectionArea } from "../../src/geometry/polygon-math.js";
  */
 function tryOpenDatabase(fn: (a: Vertex[], b: Vertex[]) => number): SpatialDatabase | null {
   try {
-    return openSpatialDatabase(fn);
+    return openSpatialDatabase((a, b) => ({ area: fn(a[0]!, b[0]!), belowA: null, belowB: null }));
   } catch (e) {
     console.error("tryOpenDatabase failed:", e);
     return null;
@@ -209,7 +208,7 @@ test("db/spatial-database: zero intersection area is not recorded", (t) => {
 });
 
 test("db/spatial-database: forwards custom tolerance to wall-plane checks", () => {
-  const db = openSpatialDatabase(wallFaceIntersectionArea);
+  const db = openSpatialDatabase();
   try {
     db.addBuilding("a", "a.json", "Building");
     db.addBuilding("b", "b.json", "Building");
@@ -218,7 +217,59 @@ test("db/spatial-database: forwards custom tolerance to wall-plane checks", () =
     opposing.rings[0]!.reverse();
     db.addWallSurface("b", opposing);
     db.computeAdjacencies(0.3);
-    assert.deepEqual(db.getAdjacencies("a"), [{ buildingId: "b", sharedWallArea: 3 }]);
+    assert.deepEqual(db.getAdjacencies("a"), [{
+      buildingId: "b", sharedWallArea: 3, sharedWallAreaWithoutAttic: null, sharedWallAreaAttic: null,
+    }]);
+  } finally {
+    db.close();
+  }
+});
+
+test("db/spatial-database: sums split areas per owner and preserves holes", () => {
+  const db = openSpatialDatabase();
+  try {
+    db.addBuilding("a", "a.json", "Building", 2);
+    db.addBuilding("b", "b.json", "Building", 3);
+    for (const y of [0, 10]) {
+      const a = wallFace(0, y, y + 4, 0, 4);
+      a.rings.push(wallFace(0, y + 1, y + 3, 1, 3).rings[0]!);
+      const b = wallFace(0, y, y + 4, 0, 4);
+      b.rings[0]!.reverse();
+      db.addWallSurface("a", a);
+      db.addWallSurface("b", b);
+    }
+    db.computeAdjacencies(0.15);
+    assert.deepEqual(db.getAdjacencies("a"), [{
+      buildingId: "b", sharedWallArea: 24, sharedWallAreaWithoutAttic: 12, sharedWallAreaAttic: 12,
+    }]);
+    assert.deepEqual(db.getAdjacencies("b"), [{
+      buildingId: "a", sharedWallArea: 24, sharedWallAreaWithoutAttic: 16, sharedWallAreaAttic: 8,
+    }]);
+  } finally {
+    db.close();
+  }
+});
+
+test("db/spatial-database: excludes sloping and degenerate walls from adjacency", () => {
+  let calls = 0;
+  const db = openSpatialDatabase(() => {
+    calls++;
+    return { area: 1, belowA: 1, belowB: 1 };
+  });
+  try {
+    db.addBuilding("a", "a.json", "Building", 3);
+    db.addBuilding("b", "b.json", "Building", 3);
+    for (const rings of [
+      [[[0, 0, 0], [0, 1, 0], [3, 1, 3], [3, 0, 3]]],
+      [[[0, 0, 0], [0, 1, 0], [0, 2, 0]]],
+      [],
+    ] as Vertex[][][]) {
+      db.addWallSurface("a", { semanticType: "WallSurface", rings });
+      db.addWallSurface("b", { semanticType: "WallSurface", rings: rings.map((ring) => [...ring].reverse()) });
+    }
+    db.computeAdjacencies(0.15);
+    assert.equal(calls, 0);
+    assert.deepEqual(db.getAdjacencies("a"), []);
   } finally {
     db.close();
   }

@@ -1,4 +1,4 @@
-import type { Vertex } from "../shared/types.js";
+import type { PolygonFace, Vertex } from "../shared/types.js";
 import { cross, dot, magnitude, normalize, vectorSubtract } from "./vector-math.js";
 
 /**
@@ -136,6 +136,13 @@ export function polygonNormal(ring: Vertex[]): Vertex | null {
   return normalize(newellAreaVector(ring));
 }
 
+/** Uses the same positive-area, near-vertical wall selection for metrics and adjacency. */
+export function isExternalWallFace(face: PolygonFace): boolean {
+  if (face.semanticType !== "WallSurface" || polygonArea(face.rings) <= 0) return false;
+  const normal = polygonNormal(face.rings[0]!);
+  return !normal || Math.abs(normal[2]) <= 0.2;
+}
+
 /**
  * Sums signed volume contributions across all rings.
  *
@@ -214,49 +221,137 @@ function sutherlandHodgman(subject: Vec2[], clip: Vec2[]): Vec2[] {
   return output;
 }
 
+interface WeightedPolygon {
+  ring: Vec2[];
+  weight: number;
+}
+
 /**
- * Computes the shared area between two 3D wall face polygons using symmetric
- * projection onto the average plane of their normals followed by
- * Sutherland-Hodgman polygon clipping. Normals must oppose within 1 degree,
- * and every vertex must lie within tolerance of the other face's plane.
+ * Represents a polygon by signed convex pieces. A concave ring's signed
+ * triangle fan has the same winding coverage as the ring, including where
+ * fan triangles lie outside it. Hole rings subtract coverage regardless of
+ * their source winding. This lets convex clipping handle concavity and holes
+ * without joining disconnected intersection components.
+ */
+function convexPieces(rings: Vec2[][]): WeightedPolygon[] {
+  return rings.flatMap((source, ringIndex) => {
+    const area = signedArea2d(source);
+    if (area === 0) return [];
+    const ring = area > 0 ? source : [...source].reverse();
+    const weight = ringIndex === 0 ? 1 : -1;
+    if (ring.every((point, i) => isLeftOfEdge(ring[(i + 2) % ring.length]!, point, ring[(i + 1) % ring.length]!))) {
+      return [{ ring, weight }];
+    }
+    const pieces: WeightedPolygon[] = [];
+    for (let i = 1; i < ring.length - 1; i++) {
+      const triangle = [ring[0]!, ring[i]!, ring[i + 1]!];
+      const triangleArea = signedArea2d(triangle);
+      if (triangleArea !== 0) {
+        pieces.push({
+          ring: triangleArea > 0 ? triangle : triangle.reverse(),
+          weight: weight * Math.sign(triangleArea),
+        });
+      }
+    }
+    return pieces;
+  });
+}
+
+/** Shared total and portions below each source building's own absolute cut. */
+export interface WallFaceIntersectionAreas {
+  area: number;
+  belowA: number | null;
+  belowB: number | null;
+}
+
+/**
+ * Intersects complete wall polygons, including holes, in a common local plane.
+ * Normals must oppose within 1 degree and vertices must meet the plane-distance
+ * tolerance. The resulting overlap is cut separately at each building's eaves;
+ * missing cuts remain null. Areas retain the common-plane measure of the total.
  *
  * @group Geometry
- * @param faceA Outer ring vertices of the first wall face.
- * @param faceB Outer ring vertices of the second wall face.
- * @param distanceTolerance Maximum separation from the other wall's plane in metres.
- * @returns Shared area in square units of the CRS, or 0 if the faces do not overlap.
  */
-export function wallFaceIntersectionArea(
-  faceA: Vertex[],
-  faceB: Vertex[],
+export function wallFaceIntersectionAreas(
+  ringsA: Vertex[][],
+  ringsB: Vertex[][],
   distanceTolerance = 0.15,
-): number {
+  splitHeightA: number | null = null,
+  splitHeightB: number | null = null,
+): WallFaceIntersectionAreas {
+  const empty = {
+    area: 0,
+    belowA: splitHeightA === null ? null : 0,
+    belowB: splitHeightB === null ? null : 0,
+  };
+  const faceA = ringsA[0] ?? [];
+  const faceB = ringsB[0] ?? [];
   const nA = polygonNormal(faceA);
   const nB = polygonNormal(faceB);
-  if (!nA || !nB) return 0;
+  if (!nA || !nB) return empty;
 
   // Edge contact between perpendicular walls must not become projected overlap.
-  if (dot(nA, nB) > OPPOSING_NORMAL_DOT_LIMIT + NORMAL_DOT_EPSILON) return 0;
+  if (dot(nA, nB) > OPPOSING_NORMAL_DOT_LIMIT + NORMAL_DOT_EPSILON) return empty;
 
   const originA = faceA[0]!;
   const originB = faceB[0]!;
   const maxDistance = distanceTolerance + PLANE_DISTANCE_EPSILON;
   if (
-    faceA.some((v) => Math.abs(dot(vectorSubtract(v, originB), nB)) > maxDistance) ||
-    faceB.some((v) => Math.abs(dot(vectorSubtract(v, originA), nA)) > maxDistance)
-  ) return 0;
+    ringsA.some((ring) => ring.some((v) => Math.abs(dot(vectorSubtract(v, originB), nB)) > maxDistance)) ||
+    ringsB.some((ring) => ring.some((v) => Math.abs(dot(vectorSubtract(v, originA), nA)) > maxDistance))
+  ) return empty;
 
   // Adjacent wall faces have opposing normals; subtracting gives a stable average direction
   const nAvg = normalize(vectorSubtract(nA, nB));
-  if (!nAvg) return 0;
+  if (!nAvg) return empty;
 
   const [u, w] = localBasis(nAvg);
   // Keep clipping coordinates local to avoid cancellation with large CRS coordinates.
-  const projA = faceA.map((v) => projectVertex(vectorSubtract(v, originA), u, w));
-  const projB = faceB.map((v) => projectVertex(vectorSubtract(v, originA), u, w));
+  const project = (rings: Vertex[][]) => rings.map((ring) =>
+    ring.map((v) => projectVertex(vectorSubtract(v, originA), u, w)));
+  const piecesA = convexPieces(project(ringsA));
+  const piecesB = convexPieces(project(ringsB));
 
-  // Sutherland-Hodgman requires the clip polygon to be CCW
-  const clipB = signedArea2d(projB) >= 0 ? projB : [...projB].reverse();
-  const clipped = sutherlandHodgman(projA, clipB);
-  return Math.abs(signedArea2d(clipped));
+  // Map a common-plane point back to a source wall along the projection normal.
+  // For slightly inclined walls the two source points can have different Z.
+  const heightOnFace = (origin: Vertex, normal: Vertex) => {
+    const denominator = dot(nAvg, normal);
+    const offset = dot(vectorSubtract(origin, originA), normal) / denominator;
+    const z0 = originA[2] + offset * nAvg[2];
+    const zx = u[2] - dot(u, normal) / denominator * nAvg[2];
+    const zy = w[2] - dot(w, normal) / denominator * nAvg[2];
+    return ([x, y]: Vec2): Vertex => [x, y, z0 + zx * x + zy * y];
+  };
+  const heightA = heightOnFace(originA, nA);
+  const heightB = heightOnFace(originB, nB);
+  const belowArea = (ring: Vec2[], height: number, lift: (point: Vec2) => Vertex): number => {
+    const lifted = ring.map(lift);
+    if (lifted.every((v) => v[2] <= height + 1e-9)) return Math.abs(signedArea2d(ring));
+    const clipped = clipRingBelowHeight(lifted, height);
+    return Math.abs(signedArea2d(clipped.map(([x, y]): Vec2 => [x, y])));
+  };
+
+  let area = 0;
+  let belowA = 0;
+  let belowB = 0;
+  for (const a of piecesA) {
+    for (const b of piecesB) {
+      const clipped = sutherlandHodgman(a.ring, b.ring);
+      const weight = a.weight * b.weight;
+      area += weight * Math.abs(signedArea2d(clipped));
+      if (splitHeightA !== null) belowA += weight * belowArea(clipped, splitHeightA, heightA);
+      if (splitHeightB !== null) belowB += weight * belowArea(clipped, splitHeightB, heightB);
+    }
+  }
+  area = Math.max(0, area);
+  return {
+    area,
+    belowA: splitHeightA === null ? null : Math.max(0, Math.min(area, belowA)),
+    belowB: splitHeightB === null ? null : Math.max(0, Math.min(area, belowB)),
+  };
+}
+
+/** Shared area of two outer wall rings; see {@link wallFaceIntersectionAreas} for holes and height splits. */
+export function wallFaceIntersectionArea(faceA: Vertex[], faceB: Vertex[], distanceTolerance = 0.15): number {
+  return wallFaceIntersectionAreas([faceA], [faceB], distanceTolerance).area;
 }

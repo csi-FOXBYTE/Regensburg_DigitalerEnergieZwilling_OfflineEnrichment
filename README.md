@@ -211,15 +211,15 @@ For each analyzed building object:
       "roofWindowArea": 0,
       "externalWallWindowArea": 0,
       "geothermalEnergyAvailable": true,
-      "adjacentBuildings": [
-        { "buildingId": "DEBY_LOD2_12345", "sharedWallArea": 42.3 }
-      ]
+      "adjacentBuildings": "[{\"buildingId\":\"DEBY_LOD2_12345\",\"sharedWallArea\":42.3,\"sharedWallAreaWithoutAttic\":35,\"sharedWallAreaAttic\":7.3}]"
     }
   }
 }
 ```
 
-`adjacentBuildings` is only present when the adjacency pass is enabled.
+`adjacentBuildings` is written when the adjacency pass is enabled. It remains a
+JSON-encoded string; parse it to obtain the adjacency array. Buildings with no
+detected neighbours receive `"[]"`, replacing any previous adjacency data.
 
 `grossExternalWallArea` remains the full gross wall area. Its two components,
 `grossExternalWallAreaWithoutAttic` and `grossExternalWallAreaAttic`, split the
@@ -244,8 +244,34 @@ The area without attic includes the portion at or below the cut; attic area is
 the remainder above it. The two values sum to the unchanged gross wall area.
 Eaves at or above the highest wall vertex give exactly zero attic wall area,
 including flat-roof buildings. Both values include shared walls and window/door
-areas unless openings are explicitly represented as polygon holes. Shared-wall
-overlap remains a total for the entire wall and is not split by attic height.
+areas unless openings are explicitly represented as polygon holes.
+
+Each adjacency retains `sharedWallArea` for the complete overlap and adds
+`sharedWallAreaWithoutAttic` and `sharedWallAreaAttic`. The overlap geometry is
+split at the **current building's** absolute eave elevation using the same roof
+island selection as the gross areas. For neighbours A and B, the total shared
+area is symmetric, but their split portions can differ because their eaves can
+be at different elevations. Both portions are `null` if the current building
+has no usable roof; a missing roof on its neighbour does not prevent its own
+split. Ground elevation is not required for this absolute cut.
+
+Known shared portions sum to `sharedWallArea`. Gross and shared areas use the
+same positive-area, near-vertical wall selection and account for polygon holes.
+Concave walls and disconnected overlap portions are supported. Shared areas
+retain the common-plane projection used by the adjacency calculation.
+
+The exposed wall area below the eaves is:
+
+```text
+grossExternalWallAreaWithoutAttic
+  - sum(adjacentBuildings[*].sharedWallAreaWithoutAttic)
+```
+
+Use the corresponding `Attic` fields for exposed wall above the eaves. Preserve
+an unknown result when a required value is `null` or missing; do not substitute
+the full shared area or treat missing split data as zero. An empty array from
+a completed adjacency pass has a shared sum of zero. Existing enriched files
+must be reprocessed with adjacency enabled to obtain the new split fields.
 
 `geothermalEnergyAvailable` is present when `geothermalFile` is set and the
 building center matches a parcel. The category mapping and availability

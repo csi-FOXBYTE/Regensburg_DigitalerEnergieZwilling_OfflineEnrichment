@@ -4,6 +4,7 @@ import { join } from "node:path";
 import Database from "better-sqlite3";
 
 import { spatialConfig } from "../config/spatial.js";
+import { isExternalWallFace, wallFaceIntersectionAreas } from "../geometry/polygon-math.js";
 import type { PolygonFace, Vertex } from "../shared/types.js";
 
 /**
@@ -14,13 +15,19 @@ import type { PolygonFace, Vertex } from "../shared/types.js";
 export interface AdjacencyResult {
   buildingId: string;
   sharedWallArea: number;
+  /** Shared area at or below this building's eaves; null without a usable roof. */
+  sharedWallAreaWithoutAttic: number | null;
+  /** Shared area above this building's eaves; null without a usable roof. */
+  sharedWallAreaAttic: number | null;
 }
 
 interface WallFaceCandidate {
   buildingA: string;
   buildingB: string;
-  verticesA: string;
-  verticesB: string;
+  ringsA: string;
+  ringsB: string;
+  splitHeightA: number | null;
+  splitHeightB: number | null;
 }
 
 /** A geothermal parcel prepared for insertion into the temporary database. */
@@ -62,11 +69,11 @@ function loadSpatialite(db: Database.Database): void {
  * The temp file is deleted when {@link SpatialDatabase.close} is called.
  *
  * @group Database
- * @param computeIntersectionArea 3D wall-face intersection function receiving both faces and the adjacency tolerance.
+ * @param computeIntersectionAreas Intersection function receiving both polygons, the tolerance and each building's absolute split elevation.
  * @returns Database handle with methods for the three pipeline passes.
  */
 export function openSpatialDatabase(
-  computeIntersectionArea: (a: Vertex[], b: Vertex[], tolerance: number) => number,
+  computeIntersectionAreas: typeof wallFaceIntersectionAreas = wallFaceIntersectionAreas,
 ) {
   const { srid } = spatialConfig;
   const tmpDir = mkdtempSync(join(tmpdir(), "spatialdb-"));
@@ -84,13 +91,14 @@ export function openSpatialDatabase(
     CREATE TABLE buildings (
       id   TEXT PRIMARY KEY,
       file TEXT NOT NULL,
-      type TEXT NOT NULL
+      type TEXT NOT NULL,
+      split_height REAL
     )
   `);
   db.exec(`
     CREATE TABLE wall_surfaces (
       building_id TEXT NOT NULL REFERENCES buildings(id),
-      vertices    TEXT NOT NULL
+      rings       TEXT NOT NULL
     )
   `);
   db.exec(`SELECT AddGeometryColumn('wall_surfaces', 'bbox_xy', ${srid}, 'LINESTRING', 'XY')`);
@@ -99,7 +107,9 @@ export function openSpatialDatabase(
     CREATE TABLE adjacencies (
       building_a       TEXT NOT NULL REFERENCES buildings(id),
       building_b       TEXT NOT NULL REFERENCES buildings(id),
-      shared_wall_area REAL NOT NULL
+      shared_wall_area REAL NOT NULL,
+      below_a          REAL,
+      below_b          REAL
     )
   `);
   db.exec(`
@@ -121,12 +131,12 @@ export function openSpatialDatabase(
   db.exec(`SELECT AddGeometryColumn('geothermal_zones', 'geom', ${srid}, 'MULTIPOLYGON', 'XY')`);
   db.exec(`SELECT CreateSpatialIndex('geothermal_zones', 'geom')`);
 
-  const stmtInsertBuilding = db.prepare<[string, string, string]>(`
-    INSERT INTO buildings (id, file, type) VALUES (?, ?, ?)
+  const stmtInsertBuilding = db.prepare<[string, string, string, number | null]>(`
+    INSERT INTO buildings (id, file, type, split_height) VALUES (?, ?, ?, ?)
   `);
 
   const stmtInsertWallSurface = db.prepare<[string, string, string]>(`
-    INSERT INTO wall_surfaces (building_id, vertices, bbox_xy)
+    INSERT INTO wall_surfaces (building_id, rings, bbox_xy)
     VALUES (?, ?, GeomFromText(?, ${srid}))
   `);
 
@@ -134,8 +144,10 @@ export function openSpatialDatabase(
     SELECT
       a.building_id AS buildingA,
       b.building_id AS buildingB,
-      a.vertices    AS verticesA,
-      b.vertices    AS verticesB
+      a.rings       AS ringsA,
+      b.rings       AS ringsB,
+      (SELECT split_height FROM buildings WHERE id = a.building_id) AS splitHeightA,
+      (SELECT split_height FROM buildings WHERE id = b.building_id) AS splitHeightB
     FROM wall_surfaces a, wall_surfaces b
     WHERE a.building_id < b.building_id
       AND b.rowid IN (
@@ -147,16 +159,17 @@ export function openSpatialDatabase(
       AND ST_Distance(a.bbox_xy, b.bbox_xy) <= @tol
   `);
 
-  const stmtInsertAdjacency = db.prepare<[string, string, number]>(`
-    INSERT INTO adjacencies (building_a, building_b, shared_wall_area) VALUES (?, ?, ?)
+  const stmtInsertAdjacency = db.prepare<[string, string, number, number | null, number | null]>(`
+    INSERT INTO adjacencies (building_a, building_b, shared_wall_area, below_a, below_b) VALUES (?, ?, ?, ?, ?)
   `);
 
-  const stmtGetAdjacencies = db.prepare<[string, string, string]>(`
+  const stmtGetAdjacencies = db.prepare<{ id: string }>(`
     SELECT
-      CASE WHEN building_a = ? THEN building_b ELSE building_a END AS buildingId,
-      SUM(shared_wall_area) AS sharedWallArea
+      CASE WHEN building_a = @id THEN building_b ELSE building_a END AS buildingId,
+      SUM(shared_wall_area) AS sharedWallArea,
+      SUM(CASE WHEN building_a = @id THEN below_a ELSE below_b END) AS sharedWallAreaWithoutAttic
     FROM adjacencies
-    WHERE building_a = ? OR building_b = ?
+    WHERE building_a = @id OR building_b = @id
     GROUP BY buildingId
   `);
 
@@ -205,8 +218,8 @@ export function openSpatialDatabase(
      *
      * @group Database
      */
-    addBuilding(id: string, file: string, type: string): void {
-      stmtInsertBuilding.run(id, file, type);
+    addBuilding(id: string, file: string, type: string, splitHeight: number | null = null): void {
+      stmtInsertBuilding.run(id, file, type, splitHeight !== null && Number.isFinite(splitHeight) ? splitHeight : null);
     },
 
     /**
@@ -215,10 +228,11 @@ export function openSpatialDatabase(
      * @group Database
      */
     addWallSurface(buildingId: string, face: PolygonFace): void {
+      if (!isExternalWallFace(face)) return;
       const outerRing = face.rings[0] ?? [];
       stmtInsertWallSurface.run(
         buildingId,
-        JSON.stringify(outerRing),
+        JSON.stringify(face.rings),
         ringToLineStringWkt(outerRing),
       );
     },
@@ -236,12 +250,12 @@ export function openSpatialDatabase(
      */
     computeAdjacencies(tolerance: number): void {
       for (const candidate of stmtCandidates.iterate({ tol: tolerance })) {
-        const { buildingA, buildingB, verticesA, verticesB } = candidate as WallFaceCandidate;
-        const faceA = JSON.parse(verticesA) as Vertex[];
-        const faceB = JSON.parse(verticesB) as Vertex[];
-        const area = computeIntersectionArea(faceA, faceB, tolerance);
+        const { buildingA, buildingB, ringsA, ringsB, splitHeightA, splitHeightB } = candidate as WallFaceCandidate;
+        const faceA = JSON.parse(ringsA) as Vertex[][];
+        const faceB = JSON.parse(ringsB) as Vertex[][];
+        const { area, belowA, belowB } = computeIntersectionAreas(faceA, faceB, tolerance, splitHeightA, splitHeightB);
         if (area > 0) {
-          stmtInsertAdjacency.run(buildingA, buildingB, area);
+          stmtInsertAdjacency.run(buildingA, buildingB, area, belowA, belowB);
         }
       }
     },
@@ -251,10 +265,16 @@ export function openSpatialDatabase(
      *
      * @group Database
      * @param buildingId CityJSON object key.
-     * @returns Adjacent buildings with their total shared wall area.
+     * @returns Adjacent buildings with total shared area and portions relative to the queried building's eaves.
      */
     getAdjacencies(buildingId: string): AdjacencyResult[] {
-      return stmtGetAdjacencies.all(buildingId, buildingId, buildingId) as AdjacencyResult[];
+      const rows = stmtGetAdjacencies.all({ id: buildingId }) as Omit<AdjacencyResult, "sharedWallAreaAttic">[];
+      return rows.map((row) => ({
+        ...row,
+        sharedWallAreaAttic: row.sharedWallAreaWithoutAttic === null
+          ? null
+          : row.sharedWallArea - row.sharedWallAreaWithoutAttic,
+      }));
     },
 
     /**

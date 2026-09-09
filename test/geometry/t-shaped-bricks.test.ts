@@ -7,6 +7,7 @@ import { calculateBuildingGeometryMetrics } from "../../src/geometry/building-me
 import { normalizeVerticesForGeometry } from "../../src/geometry/coordinate-normalization.js";
 import { extractFacesFromGeometry } from "../../src/geometry/face-extractor.js";
 import { polygonArea, wallFaceIntersectionArea } from "../../src/geometry/polygon-math.js";
+import { wallSplitHeight } from "../../src/geometry/roof-islands.js";
 import { isCityJsonLike } from "../../src/validation/cityjson.js";
 
 // Top view; both bricks are 1 m tall. Contact is x=[1,2], y=0, z=[0,1].
@@ -53,10 +54,10 @@ test("T-shaped bricks: the 1 m² wall shares exactly 1 m² with the 3 m² wall",
 });
 
 test("T-shaped bricks: adjacency totals exactly 1 m² per building", () => {
-  const db = openSpatialDatabase(wallFaceIntersectionArea);
+  const db = openSpatialDatabase();
   try {
     for (const building of buildings) {
-      db.addBuilding(building.id, "t-shaped-bricks.json", "Building");
+      db.addBuilding(building.id, "t-shaped-bricks.json", "Building", wallSplitHeight(building.faces));
       for (const face of building.faces) {
         if (face.semanticType === "WallSurface") db.addWallSurface(building.id, face);
       }
@@ -64,8 +65,8 @@ test("T-shaped bricks: adjacency totals exactly 1 m² per building", () => {
     db.computeAdjacencies(0.15);
     const fromCrossbar = db.getAdjacencies("crossbar");
     const fromStem = db.getAdjacencies("stem");
-    assert.deepEqual(fromCrossbar, [{ buildingId: "stem", sharedWallArea: 1 }]);
-    assert.deepEqual(fromStem, [{ buildingId: "crossbar", sharedWallArea: 1 }]);
+    assert.deepEqual(fromCrossbar, [{ buildingId: "stem", sharedWallArea: 1, sharedWallAreaWithoutAttic: 1, sharedWallAreaAttic: 0 }]);
+    assert.deepEqual(fromStem, [{ buildingId: "crossbar", sharedWallArea: 1, sharedWallAreaWithoutAttic: 1, sharedWallAreaAttic: 0 }]);
   } finally {
     db.close();
   }
@@ -76,19 +77,19 @@ test("staggered bricks: two 4 m walls offset by 2 m share exactly 2 m²", () => 
   const staggeredVertices = vertices.map(([x, y, z], i): [number, number, number] => [
     i < 8 ? (x === 3 ? 4 : x) : (x === 1 ? 2 : 6), y, z,
   ]);
-  const db = openSpatialDatabase(wallFaceIntersectionArea);
+  const db = openSpatialDatabase();
   try {
     for (const [id, object] of Object.entries(fixture.CityObjects)) {
-      db.addBuilding(id, "staggered-bricks", "Building");
       const faces = (object.geometry ?? []).flatMap((geometry) => extractFacesFromGeometry(geometry, staggeredVertices));
+      db.addBuilding(id, "staggered-bricks", "Building", wallSplitHeight(faces));
       assert.equal(calculateBuildingGeometryMetrics(faces).grossExternalWallArea, 10);
       for (const face of faces) {
         if (face.semanticType === "WallSurface") db.addWallSurface(id, face);
       }
     }
     db.computeAdjacencies(0.15);
-    assert.deepEqual(db.getAdjacencies("crossbar"), [{ buildingId: "stem", sharedWallArea: 2 }]);
-    assert.deepEqual(db.getAdjacencies("stem"), [{ buildingId: "crossbar", sharedWallArea: 2 }]);
+    assert.deepEqual(db.getAdjacencies("crossbar"), [{ buildingId: "stem", sharedWallArea: 2, sharedWallAreaWithoutAttic: 2, sharedWallAreaAttic: 0 }]);
+    assert.deepEqual(db.getAdjacencies("stem"), [{ buildingId: "crossbar", sharedWallArea: 2, sharedWallAreaWithoutAttic: 2, sharedWallAreaAttic: 0 }]);
   } finally {
     db.close();
   }

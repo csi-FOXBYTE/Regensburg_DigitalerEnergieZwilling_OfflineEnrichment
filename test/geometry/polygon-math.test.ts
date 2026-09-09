@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { polygonArea, polygonAreaBelowHeight, wallFaceIntersectionArea } from "../../src/geometry/polygon-math.js";
+import { polygonArea, polygonAreaBelowHeight, wallFaceIntersectionArea, wallFaceIntersectionAreas } from "../../src/geometry/polygon-math.js";
 import type { Vertex } from "../../src/shared/types.js";
 
 const CONCAVE_U_RING: Vertex[] = [
@@ -162,4 +162,65 @@ test("geometry/polygon-math: staggered overlap remains accurate at large CRS coo
   const b = wallB(2, 6, 0, 1).map(translate);
   assert.equal(wallFaceIntersectionArea(a, b), 2);
   assert.equal(wallFaceIntersectionArea(b, a), 2);
+});
+
+test("geometry/polygon-math: splits actual overlap at each absolute eave elevation", () => {
+  const translate = ([x, y, z]: Vertex): Vertex => [x + 720000, y + 5432000, z + 350];
+  const a = [wallA(0, 4, 0, 4).map(translate)];
+  const b = [wallB(0, 4, 1, 3).map(translate)];
+  for (const [height, below] of [[350, 0], [351, 0], [352, 4], [353, 8], [354, 8]]) {
+    assert.deepEqual(wallFaceIntersectionAreas(a, b, 0.15, height, 352.5), {
+      area: 8, belowA: below, belowB: 6,
+    });
+    assert.deepEqual(wallFaceIntersectionAreas(b, a, 0.15, 352.5, height), {
+      area: 8, belowA: 6, belowB: below,
+    });
+  }
+  assert.deepEqual(wallFaceIntersectionAreas(a, b, 0.15, null, 352), { area: 8, belowA: null, belowB: 4 });
+});
+
+test("geometry/polygon-math: subtracts overlapping holes once and splits them at the eaves", () => {
+  // Outer overlap is 16. Holes overlap over 2, so their union removes 6.
+  const a = [wallA(0, 4, 0, 4), wallA(1, 3, 1, 3)];
+  const b = [wallB(0, 4, 0, 4), wallB(2, 3, 0, 4)];
+  for (const holeA of [a[1]!, [...a[1]!].reverse()]) {
+    const result = wallFaceIntersectionAreas([a[0]!, holeA], b, 0.15, 2, 3);
+    assert.deepEqual(result, { area: 10, belowA: 5, belowB: 7 });
+    assert.deepEqual(wallFaceIntersectionAreas(b, [a[0]!, holeA], 0.15, 3, 2), {
+      area: 10, belowA: 7, belowB: 5,
+    });
+  }
+});
+
+test("geometry/polygon-math: concave walls can have disconnected shared portions", () => {
+  const arch = CONCAVE_U_RING.map(([x, y]): Vertex => [1, x, 3 - y]).reverse();
+  const rectangle = wallB(0, 3, 0, 2);
+  assert.deepEqual(wallFaceIntersectionAreas([arch], [rectangle], 0.15, 1, 2), {
+    area: 4, belowA: 2, belowB: 4,
+  });
+  assert.deepEqual(wallFaceIntersectionAreas([rectangle], [arch], 0.15, 2, 1), {
+    area: 4, belowA: 4, belowB: 2,
+  });
+  assert.deepEqual(wallFaceIntersectionAreas([arch], [[...arch].reverse()], 0.15, 2, 3), {
+    area: 7, belowA: 4, belowB: 7,
+  });
+});
+
+test("geometry/polygon-math: eave rounding does not leave a shared attic strip", () => {
+  assert.deepEqual(wallFaceIntersectionAreas([wallA(0, 1, 0, 3)], [wallB(0, 1, 0, 3)], 0.15, 3 - 1e-10, 3), {
+    area: 3, belowA: 3, belowB: 3,
+  });
+});
+
+test("geometry/polygon-math: inclined walls split on their own source planes", () => {
+  const a = [wallA(0, 2, 0, 3).map(([x, y, z]): Vertex => [x + 0.1 * z, y, z])];
+  const b = [wallB(0, 2, 0, 3).map(([x, y, z]): Vertex => [x + 0.1 * z + 0.1, y, z])];
+  const ab = wallFaceIntersectionAreas(a, b, 0.15, 1, 1);
+  const ba = wallFaceIntersectionAreas(b, a, 0.15, 1, 1);
+  // Projection shifts the lower end of A's overlap upward by 0.1 * 0.1 / 1.01.
+  const scale = 2 * Math.sqrt(1.01);
+  assert.ok(Math.abs(ab.belowA! - (1 - 0.01 / 1.01) * scale) < EPSILON);
+  assert.ok(Math.abs(ab.belowB! - scale) < EPSILON);
+  assert.ok(Math.abs(ab.belowA! - ba.belowB!) < EPSILON);
+  assert.ok(Math.abs(ab.belowB! - ba.belowA!) < EPSILON);
 });

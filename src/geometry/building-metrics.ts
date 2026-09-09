@@ -1,6 +1,6 @@
 import type { BuildingGeometryMetrics, PolygonFace } from "../shared/types.js";
-import { polygonArea, polygonAreaBelowHeight, polygonNormal, polygonSignedVolumeContribution } from "./polygon-math.js";
-import { findRoofIslands } from "./roof-islands.js";
+import { isExternalWallFace, polygonArea, polygonAreaBelowHeight, polygonNormal, polygonSignedVolumeContribution } from "./polygon-math.js";
+import { wallSplitHeight } from "./roof-islands.js";
 
 /**
  * Computes building metrics from a set of polygonal faces.
@@ -59,20 +59,16 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
       }
     }
 
-    if (face.semanticType === "WallSurface") {
-      const normal = polygonNormal(face.rings[0]!);
-
-      if (!normal || Math.abs(normal[2]) <= 0.2) {
-        wallArea += area;
-        wallFaces.push({ face, area });
-      }
+    if (isExternalWallFace(face)) {
+      wallArea += area;
+      wallFaces.push({ face, area });
     }
   }
 
-  const splitHeight = findRoofIslands(faces)[0]?.minHeight;
+  const splitHeight = wallSplitHeight(faces);
   let grossExternalWallAreaWithoutAttic: number | null = null;
   let grossExternalWallAreaAttic: number | null = null;
-  if (splitHeight !== undefined && Number.isFinite(splitHeight)) {
+  if (splitHeight !== null) {
     grossExternalWallAreaWithoutAttic = Math.min(wallArea, wallFaces.reduce(
       (sum, { face, area }) => sum + Math.min(area, polygonAreaBelowHeight(face.rings, splitHeight)),
       0,
@@ -85,7 +81,7 @@ export function calculateBuildingGeometryMetrics(faces: PolygonFace[]): Building
   const upperFloorArea = groundArea;
   const roofPitchDegrees = roofPitchArea > 0 ? roofPitchWeighted / roofPitchArea : null;
   const height = Number.isFinite(minGroundZ) && Number.isFinite(maxRoofZ) ? maxRoofZ - minGroundZ : null;
-  const lowestEavesHeight = splitHeight !== undefined && Number.isFinite(splitHeight) && Number.isFinite(minGroundZ)
+  const lowestEavesHeight = splitHeight !== null && Number.isFinite(minGroundZ)
     ? splitHeight - minGroundZ
     : null;
   const envelopeArea = groundArea + wallArea + roofArea;

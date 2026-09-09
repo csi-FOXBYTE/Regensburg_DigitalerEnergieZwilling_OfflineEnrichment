@@ -21,6 +21,12 @@ interface RoofIsland {
   minHeight: number;
 }
 
+/** Absolute wall split elevation from the largest roof island, or null without a usable roof. */
+export function wallSplitHeight(faces: PolygonFace[]): number | null {
+  const height = findRoofIslands(faces)[0]?.minHeight;
+  return height !== undefined && Number.isFinite(height) ? height : null;
+}
+
 function makeEdge(start: Vertex, end: Vertex, faceIndex: number): RoofEdge | null {
   const delta = vectorSubtract(end, start);
   const length = magnitude(delta);

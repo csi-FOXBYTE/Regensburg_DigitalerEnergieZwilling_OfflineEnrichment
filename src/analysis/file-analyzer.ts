@@ -10,7 +10,7 @@ import { importGeothermalZonesFromGpkg } from "../db/geothermal-zones-importer.j
 import { openSpatialDatabase } from "../db/spatial-database.js";
 import { extractFacesFromGeometry } from "../geometry/face-extractor.js";
 import { normalizeVerticesForGeometry } from "../geometry/coordinate-normalization.js";
-import { wallFaceIntersectionArea } from "../geometry/polygon-math.js";
+import { wallSplitHeight } from "../geometry/roof-islands.js";
 import { isObject } from "../shared/guards.js";
 import type {
   BuildingAnalysisResult,
@@ -37,10 +37,9 @@ function indexBuildingsIntoDb(
   for (const buildingId of Object.keys(parsed.CityObjects)) {
     const cityObject = parsed.CityObjects[buildingId];
     if (!isObject(cityObject)) continue;
-    db.addBuilding(buildingId, filePath, cityObject.type);
-
     const geometries = Array.isArray(cityObject.geometry) ? cityObject.geometry : [];
     const faces = geometries.flatMap((g) => extractFacesFromGeometry(g, vertices));
+    db.addBuilding(buildingId, filePath, cityObject.type, wallSplitHeight(faces));
 
     for (const face of faces) {
       if (face.semanticType === "WallSurface") {
@@ -56,7 +55,6 @@ function enrichWithAdjacencies(
 ): void {
   for (const buildingId of Object.keys(parsed.CityObjects)) {
     const adjacencies = db.getAdjacencies(buildingId);
-    if (adjacencies.length === 0) continue;
 
     const cityObject = parsed.CityObjects[buildingId];
     if (!isObject(cityObject)) continue;
@@ -269,7 +267,7 @@ export async function processCityJsonFiles(
     }
 
     if (needsSpatialDb) {
-      db = openSpatialDatabase(wallFaceIntersectionArea);
+      db = openSpatialDatabase();
 
       if (shouldEnrichAgeZones) {
         importAgeZonesFromGpkg(ageZonesFile, db);
