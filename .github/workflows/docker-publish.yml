@@ -1,21 +1,36 @@
-name: Publish Docker image to GHCR
+name: Release and publish Docker image to GHCR
 
 on:
-  push:
-    tags:
-      - "*"
   workflow_dispatch:
+    inputs:
+      confirm_current_version:
+        description: "Release the version already committed in package.json on main. Update and commit it before running."
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: offline-enrichment-release
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  sbom:
+  release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.publish.outputs.version }}
+      commit: ${{ steps.publish.outputs.commit }}
+      short_commit: ${{ steps.publish.outputs.short_commit }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -28,13 +43,36 @@ jobs:
           node-version: 22.23.4
           cache: pnpm
 
+      - name: Check release version
+        id: version
+        env:
+          CONFIRM_CURRENT_VERSION: ${{ inputs.confirm_current_version }}
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Run this release workflow from main." >&2
+            exit 1
+          fi
+          if [[ "$CONFIRM_CURRENT_VERSION" != "true" ]]; then
+            echo "Confirm that the committed package.json version is the intended release." >&2
+            exit 1
+          fi
+          version="$(node -p "require('./package.json').version")"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "package.json version is not a valid release tag: $version" >&2
+            exit 1
+          fi
+          if git show-ref --verify --quiet "refs/tags/$version"; then
+            echo "Release tag $version already exists. Commit a new package.json version first." >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - name: Generate current SBOM
         run: |
           pnpm install --frozen-lockfile
           pnpm run sbom
 
-      - name: Save SBOM for the image build
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+      - name: Save release SBOM
         uses: actions/upload-artifact@v4
         with:
           name: offline-enrichment-sbom
@@ -42,22 +80,34 @@ jobs:
             SBOM.cdx.json
             SBOM.csv
 
+      - name: Commit SBOM and create release tag
+        id: publish
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- SBOM.cdx.json SBOM.csv
+          git commit --allow-empty -m "chore: release $RELEASE_VERSION"
+          git tag "$RELEASE_VERSION"
+          git push --atomic origin HEAD:refs/heads/main "refs/tags/$RELEASE_VERSION"
+          release_commit="$(git rev-parse HEAD)"
+          echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "commit=$release_commit" >> "$GITHUB_OUTPUT"
+          echo "short_commit=${release_commit:0:7}" >> "$GITHUB_OUTPUT"
+
   docker:
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-    needs: sbom
+    needs: release
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Checkout
+      - name: Checkout release commit
         uses: actions/checkout@v4
-
-      - name: Download generated SBOM
-        uses: actions/download-artifact@v4
         with:
-          name: offline-enrichment-sbom
+          ref: ${{ needs.release.outputs.commit }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -70,17 +120,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Normalize image name
-        id: vars
-        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ steps.vars.outputs.image }}
-          tags: |
-            type=ref,event=tag
-            type=sha
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -90,5 +131,9 @@ jobs:
           pull: true
           push: true
           sbom: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ needs.release.outputs.version }}
+            ${{ steps.image.outputs.name }}:sha-${{ needs.release.outputs.short_commit }}
+          labels: |
+            org.opencontainers.image.version=${{ needs.release.outputs.version }}
+            org.opencontainers.image.revision=${{ needs.release.outputs.commit }}

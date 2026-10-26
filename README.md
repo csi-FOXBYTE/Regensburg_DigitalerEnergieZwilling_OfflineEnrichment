@@ -88,11 +88,15 @@ declared in `sbom.config.json`, validates the component and dependency reference
 then writes `SBOM.cdx.json` and `SBOM.csv`. Keep that configuration synchronized
 with the Dockerfile's base images and explicitly installed system packages.
 
-The Docker publish workflow runs only for tag pushes or manual dispatches. It
-regenerates the SBOM with Node.js 22.23.4 and pnpm 11.3.0 for that image build,
-saves the generated files as a workflow artifact, embeds `SBOM.cdx.json` in the
-image, and produces a BuildKit SBOM attestation for the final image. It does not
-commit generated files or include an audit receipt in the image.
+To publish a release, first update and commit the version in `package.json` on
+`main`. Then run the Docker publish workflow manually from `main` and check the
+confirmation box stating that it will use the committed package version. The
+workflow stops if that version already has a tag. It regenerates both SBOMs with
+Node.js 22.23.4 and pnpm 11.3.0, saves them as a workflow artifact, commits them
+to `main`, and tags that release commit with the package version. It builds the
+image from that exact commit, embeds `SBOM.cdx.json`, and produces a BuildKit SBOM
+attestation. Tag pushes and other commits do not start the workflow. The image
+does not include an audit receipt.
 A full ScanCode/SPDX compliance audit must be run separately when preparing
 an openCode publication; normal image builds do not run it.
 
