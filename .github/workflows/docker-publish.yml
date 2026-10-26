@@ -2,16 +2,6 @@ name: Publish Docker image to GHCR
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/docker-publish.yml
-      - Dockerfile
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - sbom.config.json
-      - scripts/generate-sbom.mjs
     tags:
       - "*"
   workflow_dispatch:
@@ -22,8 +12,6 @@ permissions:
 jobs:
   sbom:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout
@@ -44,18 +32,6 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm run sbom
-
-      - name: Commit updated SBOM on main
-        if: github.ref == 'refs/heads/main'
-        run: |
-          if git diff --quiet -- SBOM.cdx.json SBOM.csv; then
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- SBOM.cdx.json SBOM.csv
-          git commit -m 'chore: refresh SBOM'
-          git push origin HEAD:main
 
       - name: Save SBOM for the image build
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'

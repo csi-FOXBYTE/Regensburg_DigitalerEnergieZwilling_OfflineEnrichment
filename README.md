@@ -88,11 +88,11 @@ declared in `sbom.config.json`, validates the component and dependency reference
 then writes `SBOM.cdx.json` and `SBOM.csv`. Keep that configuration synchronized
 with the Dockerfile's base images and explicitly installed system packages.
 
-The Docker publish workflow regenerates these files with Node.js 22.23.4 and
-pnpm 11.3.0. On relevant pushes to `main`, it commits changed SBOM files. For a
-tagged or manually dispatched image build, it saves the generated files as a
-workflow artifact, embeds `SBOM.cdx.json` in the image, and produces a BuildKit
-SBOM attestation for the final image. The image contains no audit receipt.
+The Docker publish workflow runs only for tag pushes or manual dispatches. It
+regenerates the SBOM with Node.js 22.23.4 and pnpm 11.3.0 for that image build,
+saves the generated files as a workflow artifact, embeds `SBOM.cdx.json` in the
+image, and produces a BuildKit SBOM attestation for the final image. It does not
+commit generated files or include an audit receipt in the image.
 A full ScanCode/SPDX compliance audit must be run separately when preparing
 an openCode publication; normal image builds do not run it.
 
