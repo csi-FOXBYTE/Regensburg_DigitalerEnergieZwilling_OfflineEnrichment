@@ -1,6 +1,7 @@
 {
   "name": "@csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment",
   "version": "0.9.2",
+  "packageManager": "pnpm@11.3.0",
   "description": "Offline CityJSON enrichment for building geometry metrics and digitalEnergyTwin attributes.",
   "type": "module",
   "scripts": {

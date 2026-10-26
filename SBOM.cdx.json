@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:917331b2-5a88-4ac9-a570-7d55a6851535",
+  "serialNumber": "urn:uuid:1f3d4f7c-e4f2-418d-9f43-f1c22cc5bd9d",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-03T05:28:20.059Z",
+    "timestamp": "2026-10-26T07:54:30.806Z",
     "lifecycles": [
       {
         "phase": "build"
@@ -28,9 +28,9 @@
     "component": {
       "type": "application",
       "name": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment",
-      "version": "0.7.0",
-      "purl": "pkg:npm/%40csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment@0.7.0",
-      "bom-ref": "pkg:npm/%40csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment@0.7.0",
+      "version": "0.9.2",
+      "purl": "pkg:npm/%40csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment@0.9.2",
+      "bom-ref": "pkg:npm/%40csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment@0.9.2",
       "group": "@csi-foxbyte",
       "licenses": [
         {
@@ -63,7 +63,7 @@
         },
         {
           "name": "vcs:commit",
-          "value": "a230ff88f4d8721b85dfea98af56819a6358f841"
+          "value": "cd752cad857201c4ab512997f6853539639e2057"
         },
         {
           "name": "sbom:source-state",
@@ -151,12 +151,16 @@
     },
     {
       "type": "library",
-      "name": "node",
-      "version": "25.3.3",
-      "purl": "pkg:npm/%40types/node@25.3.3",
-      "bom-ref": "pkg:npm/%40types/node@25.3.3",
-      "group": "@types",
-      "description": "TypeScript definitions for node",
+      "name": "publint",
+      "version": "0.3.18",
+      "purl": "pkg:npm/publint@0.3.18",
+      "bom-ref": "pkg:npm/publint@0.3.18",
+      "description": "Lint packaging errors",
+      "authors": [
+        {
+          "name": "Bjorn Lu"
+        }
+      ],
       "licenses": [
         {
           "license": {
@@ -167,21 +171,21 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@types/node/-/node-25.3.3.tgz",
+          "url": "https://registry.npmjs.org/publint/-/publint-0.3.18.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "0e9cdbac7ef021c05a2626e92a8f679d240bd0c4d17675adb46c84e61686c0af3ac6030e9052e9eef1327d03c62ce261e70358889dd5f4f994303855f6ef2491"
+              "content": "2512457814eb7f1e2a2f012e1853e4fa168938937deca9cfb8ad35ca3fb893f5a3e4182838ae6e36c8afa68ae2a818e4d890dab2583ba893a11919e996d19ea2"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node"
+          "url": "https://publint.dev"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+          "url": "git+https://github.com/publint/publint.git"
         }
       ],
       "properties": [
@@ -271,16 +275,12 @@
     },
     {
       "type": "library",
-      "name": "publint",
-      "version": "0.3.18",
-      "purl": "pkg:npm/publint@0.3.18",
-      "bom-ref": "pkg:npm/publint@0.3.18",
-      "description": "Lint packaging errors",
-      "authors": [
-        {
-          "name": "Bjorn Lu"
-        }
-      ],
+      "name": "node",
+      "version": "25.3.3",
+      "purl": "pkg:npm/%40types/node@25.3.3",
+      "bom-ref": "pkg:npm/%40types/node@25.3.3",
+      "group": "@types",
+      "description": "TypeScript definitions for node",
       "licenses": [
         {
           "license": {
@@ -291,21 +291,21 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/publint/-/publint-0.3.18.tgz",
+          "url": "https://registry.npmjs.org/@types/node/-/node-25.3.3.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "2512457814eb7f1e2a2f012e1853e4fa168938937deca9cfb8ad35ca3fb893f5a3e4182838ae6e36c8afa68ae2a818e4d890dab2583ba893a11919e996d19ea2"
+              "content": "0e9cdbac7ef021c05a2626e92a8f679d240bd0c4d17675adb46c84e61686c0af3ac6030e9052e9eef1327d03c62ce261e70358889dd5f4f994303855f6ef2491"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://publint.dev"
+          "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/publint/publint.git"
+          "url": "git+https://github.com/DefinitelyTyped/DefinitelyTyped.git"
         }
       ],
       "properties": [
@@ -692,6 +692,63 @@
     },
     {
       "type": "library",
+      "name": "typedoc",
+      "version": "0.28.17",
+      "purl": "pkg:npm/typedoc@0.28.17",
+      "bom-ref": "pkg:npm/typedoc@0.28.17",
+      "description": "Create api documentation for TypeScript projects.",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/typedoc/-/typedoc-0.28.17.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "6642761bb999adbc6b2b18a74d032316ab02a1863a6b92eec2fd8629b4e70421205768a1626e427e503d267240c07d296566afa9f6319839051cfb78cb1da80d"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://typedoc.org"
+        },
+        {
+          "type": "vcs",
+          "url": "git://github.com/TypeStrong/TypeDoc.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "direct runtime dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "typedoc-plugin-markdown",
       "version": "4.10.0",
       "purl": "pkg:npm/typedoc-plugin-markdown@4.10.0",
@@ -754,36 +811,42 @@
     },
     {
       "type": "library",
-      "name": "typedoc",
-      "version": "0.28.17",
-      "purl": "pkg:npm/typedoc@0.28.17",
-      "bom-ref": "pkg:npm/typedoc@0.28.17",
-      "description": "Create api documentation for TypeScript projects.",
+      "name": "pack",
+      "version": "0.1.4",
+      "purl": "pkg:npm/%40publint/pack@0.1.4",
+      "bom-ref": "pkg:npm/%40publint/pack@0.1.4",
+      "group": "@publint",
+      "description": "Utilities for packing and unpacking npm packages",
+      "authors": [
+        {
+          "name": "Bjorn Lu"
+        }
+      ],
       "licenses": [
         {
           "license": {
-            "id": "Apache-2.0"
+            "id": "MIT"
           }
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/typedoc/-/typedoc-0.28.17.tgz",
+          "url": "https://registry.npmjs.org/@publint/pack/-/pack-0.1.4.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "6642761bb999adbc6b2b18a74d032316ab02a1863a6b92eec2fd8629b4e70421205768a1626e427e503d267240c07d296566afa9f6319839051cfb78cb1da80d"
+              "content": "1c35535aadc7d2e4d7894d1e792427b5c5544cf3f719a9b3797238d7ec7bb94f49eb9260590877a966476e54758b49e95df16d17e9b10625369c91fcce7c569d"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://typedoc.org"
+          "url": "https://github.com/publint/publint#readme"
         },
         {
           "type": "vcs",
-          "url": "git://github.com/TypeStrong/TypeDoc.git"
+          "url": "git+https://github.com/publint/publint.git"
         }
       ],
       "properties": [
@@ -797,7 +860,7 @@
         },
         {
           "name": "sbom:relationship",
-          "value": "direct runtime dependency"
+          "value": "transitive development dependency"
         },
         {
           "name": "sbom:metadata-source",
@@ -811,11 +874,16 @@
     },
     {
       "type": "library",
-      "name": "undici-types",
-      "version": "7.18.2",
-      "purl": "pkg:npm/undici-types@7.18.2",
-      "bom-ref": "pkg:npm/undici-types@7.18.2",
-      "description": "A stand-alone types package for Undici",
+      "name": "package-manager-detector",
+      "version": "1.6.0",
+      "purl": "pkg:npm/package-manager-detector@1.6.0",
+      "bom-ref": "pkg:npm/package-manager-detector@1.6.0",
+      "description": "Package manager detector",
+      "authors": [
+        {
+          "name": "Anthony Fu"
+        }
+      ],
       "licenses": [
         {
           "license": {
@@ -826,21 +894,145 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/undici-types/-/undici-types-7.18.2.tgz",
+          "url": "https://registry.npmjs.org/package-manager-detector/-/package-manager-detector-1.6.0.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "02cb82cdf7c61c9c9b49a46b9abe5e1ebf359b0254de48f0e8cfaea6b5af09788d78df52386c10dc99fc8dbf26dd9ea2cd58249e7d51d054c21003f642b2d8ff"
+              "content": "eb50394e1a138831bf0bcb3c50c6704a8ac01b0309d044551a3d8e8e85b9a406a5b0d3a0d79fa24223f3acb2788e16751c9ce60b63c81d3da81221f74797f334"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://undici.nodejs.org"
+          "url": "https://github.com/antfu-collective/package-manager-detector#readme"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/nodejs/undici.git"
+          "url": "git+https://github.com/antfu-collective/package-manager-detector.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "picocolors",
+      "version": "1.1.1",
+      "purl": "pkg:npm/picocolors@1.1.1",
+      "bom-ref": "pkg:npm/picocolors@1.1.1",
+      "description": "The tiniest and the fastest library for terminal output formatting with ANSI colors",
+      "authors": [
+        {
+          "name": "Alexey Raspopov"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "c5c787dac9e1b5be4cf658aa0ec984c39ea57b7efa993664117fe311bfd1c4d1727a036e97b78db250973fd1438ff2dcbb45fc284c8c71e3f69eda5a1eb0c454"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/alexeyraspopov/picocolors#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/alexeyraspopov/picocolors.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sade",
+      "version": "1.8.1",
+      "purl": "pkg:npm/sade@1.8.1",
+      "bom-ref": "pkg:npm/sade@1.8.1",
+      "description": "Smooth (CLI) operator 🎶",
+      "authors": [
+        {
+          "name": "Luke Edwards"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/sade/-/sade-1.8.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "c5a9770995f55e5a3f938029c0216b1d50028bd7c1a89ed5fa6c2106cb9fff520e29b072d3df057b1f966bfe5032e6f0d3da5267fbbc118f0f5a07af26c5e9d4"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/lukeed/sade#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/lukeed/sade.git"
         }
       ],
       "properties": [
@@ -1354,6 +1546,63 @@
     },
     {
       "type": "library",
+      "name": "rolldown",
+      "version": "1.0.0-rc.7",
+      "purl": "pkg:npm/rolldown@1.0.0-rc.7",
+      "bom-ref": "pkg:npm/rolldown@1.0.0-rc.7",
+      "description": "Fast JavaScript/TypeScript bundler in Rust with Rollup-compatible API.",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/rolldown/-/rolldown-1.0.0-rc.7.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "e57d3311e405cc3a41dcca945906723b64d442a3fd5674fb0aa5c717695a4c5472e3cefe6fa419ca8b426b33b2480b992c0be994268e56c835b559ff6659b07e"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://rolldown.rs/"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/rolldown/rolldown.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "rolldown-plugin-dts",
       "version": "0.22.3",
       "purl": "pkg:npm/rolldown-plugin-dts@0.22.3",
@@ -1389,63 +1638,6 @@
         {
           "type": "vcs",
           "url": "git+https://github.com/sxzz/rolldown-plugin-dts.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "rolldown",
-      "version": "1.0.0-rc.7",
-      "purl": "pkg:npm/rolldown@1.0.0-rc.7",
-      "bom-ref": "pkg:npm/rolldown@1.0.0-rc.7",
-      "description": "Fast JavaScript/TypeScript bundler in Rust with Rollup-compatible API.",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/rolldown/-/rolldown-1.0.0-rc.7.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "e57d3311e405cc3a41dcca945906723b64d442a3fd5674fb0aa5c717695a4c5472e3cefe6fa419ca8b426b33b2480b992c0be994268e56c835b559ff6659b07e"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://rolldown.rs/"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/rolldown/rolldown.git"
         }
       ],
       "properties": [
@@ -1845,193 +2037,6 @@
     },
     {
       "type": "library",
-      "name": "pack",
-      "version": "0.1.4",
-      "purl": "pkg:npm/%40publint/pack@0.1.4",
-      "bom-ref": "pkg:npm/%40publint/pack@0.1.4",
-      "group": "@publint",
-      "description": "Utilities for packing and unpacking npm packages",
-      "authors": [
-        {
-          "name": "Bjorn Lu"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@publint/pack/-/pack-0.1.4.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "1c35535aadc7d2e4d7894d1e792427b5c5544cf3f719a9b3797238d7ec7bb94f49eb9260590877a966476e54758b49e95df16d17e9b10625369c91fcce7c569d"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/publint/publint#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/publint/publint.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "package-manager-detector",
-      "version": "1.6.0",
-      "purl": "pkg:npm/package-manager-detector@1.6.0",
-      "bom-ref": "pkg:npm/package-manager-detector@1.6.0",
-      "description": "Package manager detector",
-      "authors": [
-        {
-          "name": "Anthony Fu"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/package-manager-detector/-/package-manager-detector-1.6.0.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "eb50394e1a138831bf0bcb3c50c6704a8ac01b0309d044551a3d8e8e85b9a406a5b0d3a0d79fa24223f3acb2788e16751c9ce60b63c81d3da81221f74797f334"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/antfu-collective/package-manager-detector#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/antfu-collective/package-manager-detector.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "picocolors",
-      "version": "1.1.1",
-      "purl": "pkg:npm/picocolors@1.1.1",
-      "bom-ref": "pkg:npm/picocolors@1.1.1",
-      "description": "The tiniest and the fastest library for terminal output formatting with ANSI colors",
-      "authors": [
-        {
-          "name": "Alexey Raspopov"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "c5c787dac9e1b5be4cf658aa0ec984c39ea57b7efa993664117fe311bfd1c4d1727a036e97b78db250973fd1438ff2dcbb45fc284c8c71e3f69eda5a1eb0c454"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/alexeyraspopov/picocolors#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/alexeyraspopov/picocolors.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "fsevents",
       "version": "2.3.3",
       "purl": "pkg:npm/fsevents@2.3.3",
@@ -2073,16 +2078,11 @@
     },
     {
       "type": "library",
-      "name": "sade",
-      "version": "1.8.1",
-      "purl": "pkg:npm/sade@1.8.1",
-      "bom-ref": "pkg:npm/sade@1.8.1",
-      "description": "Smooth (CLI) operator 🎶",
-      "authors": [
-        {
-          "name": "Luke Edwards"
-        }
-      ],
+      "name": "undici-types",
+      "version": "7.18.2",
+      "purl": "pkg:npm/undici-types@7.18.2",
+      "bom-ref": "pkg:npm/undici-types@7.18.2",
+      "description": "A stand-alone types package for Undici",
       "licenses": [
         {
           "license": {
@@ -2093,21 +2093,21 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/sade/-/sade-1.8.1.tgz",
+          "url": "https://registry.npmjs.org/undici-types/-/undici-types-7.18.2.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "c5a9770995f55e5a3f938029c0216b1d50028bd7c1a89ed5fa6c2106cb9fff520e29b072d3df057b1f966bfe5032e6f0d3da5267fbbc118f0f5a07af26c5e9d4"
+              "content": "02cb82cdf7c61c9c9b49a46b9abe5e1ebf359b0254de48f0e8cfaea6b5af09788d78df52386c10dc99fc8dbf26dd9ea2cd58249e7d51d054c21003f642b2d8ff"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://github.com/lukeed/sade#readme"
+          "url": "https://undici.nodejs.org"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/lukeed/sade.git"
+          "url": "git+https://github.com/nodejs/undici.git"
         }
       ],
       "properties": [
@@ -2921,382 +2921,6 @@
     },
     {
       "type": "library",
-      "name": "generator",
-      "version": "8.0.0-rc.2",
-      "purl": "pkg:npm/%40babel/generator@8.0.0-rc.2",
-      "bom-ref": "pkg:npm/%40babel/generator@8.0.0-rc.2",
-      "group": "@babel",
-      "description": "Turns an AST into code.",
-      "authors": [
-        {
-          "name": "The Babel Team"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@babel/generator/-/generator-8.0.0-rc.2.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "a0243520a3f093309e27300f6fb16ff2b43d939fb5b06f267f6ba81e23089cf62f9117eb0c9c5b4c86c7e7553e8ecb6592086eb34bc08b7101be47ef12c60d2d"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://babel.dev/docs/en/next/babel-generator"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/babel/babel.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "helper-validator-identifier",
-      "version": "8.0.0-rc.2",
-      "purl": "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
-      "bom-ref": "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
-      "group": "@babel",
-      "description": "Validate identifier/keywords name",
-      "authors": [
-        {
-          "name": "The Babel Team"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-8.0.0-rc.2.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "c44c54064b975898d5b886ceef3eaaeff040f5b81f24312154bd2082b8202cc6e0d08cc2516193d6164613ca941fb225eff443fdae9c67700016bae5a752c5fc"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/babel/babel#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/babel/babel.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "parser",
-      "version": "8.0.0-rc.2",
-      "purl": "pkg:npm/%40babel/parser@8.0.0-rc.2",
-      "bom-ref": "pkg:npm/%40babel/parser@8.0.0-rc.2",
-      "group": "@babel",
-      "description": "A JavaScript parser",
-      "authors": [
-        {
-          "name": "The Babel Team"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@babel/parser/-/parser-8.0.0-rc.2.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "dbd02112d72ae31f03a774fbdaabd43191f1d0e3170a3e09cbf4c445e41af8a58b967e76e028f57d66f74058b497fc52a69b50051eb2f513445eec6916fc2251"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://babel.dev/docs/en/next/babel-parser"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/babel/babel.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "types",
-      "version": "8.0.0-rc.2",
-      "purl": "pkg:npm/%40babel/types@8.0.0-rc.2",
-      "bom-ref": "pkg:npm/%40babel/types@8.0.0-rc.2",
-      "group": "@babel",
-      "description": "Babel Types is a Lodash-esque utility library for AST nodes",
-      "authors": [
-        {
-          "name": "The Babel Team"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@babel/types/-/types-8.0.0-rc.2.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "f758006964739c3c125f8136b59d588c1b887e74153850c2436af44e86f2d20bb85c46f217adb79172cc03c77865b0aef9f20d72bb9d92611cc125078030e437"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://babel.dev/docs/en/next/babel-types"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/babel/babel.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "ast-kit",
-      "version": "3.0.0-beta.1",
-      "purl": "pkg:npm/ast-kit@3.0.0-beta.1",
-      "bom-ref": "pkg:npm/ast-kit@3.0.0-beta.1",
-      "description": "A toolkit for easy Babel AST generation and manipulation.",
-      "authors": [
-        {
-          "name": "Kevin Deng"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/ast-kit/-/ast-kit-3.0.0-beta.1.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "b6b9a57809d9d8fc4dfe5a07595861c75a9e3874915eae130ec041c6adc6a9e262b5f937fa34d0faffc2d649bf298abd33bc0aa827b0321fbf340bd51fb9be6f"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/sxzz/ast-kit#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/sxzz/ast-kit.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "birpc",
-      "version": "4.0.0",
-      "purl": "pkg:npm/birpc@4.0.0",
-      "bom-ref": "pkg:npm/birpc@4.0.0",
-      "description": "Message based Two-way remote procedure call",
-      "authors": [
-        {
-          "name": "Anthony Fu"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/birpc/-/birpc-4.0.0.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "2d2852c493f429399dd74d5be834721818f9ecb6714836162a2b50356fe68bc19132f65bd3bf147fdfa9bde6b1d43ad52fcf6f9bb9967be4e8bdd23f5033ae3f"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/antfu-collective/birpc#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/antfu-collective/birpc.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "binding-android-arm64",
       "version": "1.0.0-rc.7",
       "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.0.0-rc.7",
@@ -3675,14 +3299,14 @@
     },
     {
       "type": "library",
-      "name": "dts-resolver",
-      "version": "2.1.3",
-      "purl": "pkg:npm/dts-resolver@2.1.3",
-      "bom-ref": "pkg:npm/dts-resolver@2.1.3",
-      "description": "Resolves TypeScript declaration files for dependencies.",
+      "name": "mri",
+      "version": "1.2.0",
+      "purl": "pkg:npm/mri@1.2.0",
+      "bom-ref": "pkg:npm/mri@1.2.0",
+      "description": "Quickly scan for CLI flags and arguments",
       "authors": [
         {
-          "name": "Kevin Deng"
+          "name": "Luke Edwards"
         }
       ],
       "licenses": [
@@ -3695,21 +3319,21 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/dts-resolver/-/dts-resolver-2.1.3.tgz",
+          "url": "https://registry.npmjs.org/mri/-/mri-1.2.0.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "6e285cee33c2f7456ba2c5cdccad0b4c4d9cb8b3fa8ebd11a3c8e4fa432e80745e2552c8a47cffc5a75eab7321bb0c8ee130f8380dcbd50f29041151734f13b3"
+              "content": "b73cec91bddb1bc2ef606145fe60d3a6ade3a48e90f707372c49816a086ef83742b2c77515a90dec17348553661321aad5bab74607e409bddc9902e934f3aba0"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://github.com/sxzz/dts-resolver#readme"
+          "url": "https://github.com/lukeed/mri#readme"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/sxzz/dts-resolver.git"
+          "url": "git+https://github.com/lukeed/mri.git"
         }
       ],
       "properties": [
@@ -3968,11 +3592,12 @@
     },
     {
       "type": "library",
-      "name": "pluginutils",
+      "name": "binding-linux-x64-gnu",
       "version": "1.0.0-rc.7",
-      "purl": "pkg:npm/%40rolldown/pluginutils@1.0.0-rc.7",
-      "bom-ref": "pkg:npm/%40rolldown/pluginutils@1.0.0-rc.7",
+      "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.0.0-rc.7",
+      "bom-ref": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.0.0-rc.7",
       "group": "@rolldown",
+      "description": "Fast JavaScript/TypeScript bundler in Rust with Rollup-compatible API.",
       "licenses": [
         {
           "license": {
@@ -3983,11 +3608,11 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.7.tgz",
+          "url": "https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.0.0-rc.7.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "aae8d17c2f2c1552276123cf30b401c9187bce1c241854b8fadc8c43cdecad5d6aaf12f883c136b72c55572c5dd3ef1078133598893d29b5b191e811afbe97cc"
+              "content": "d531dbe8574190010bd76cef52e7b66e62b85b5f8ffadcfc3e0bb9b84ceafb1aed61ade20739a628d9727d4cc214d0aab0f77c589110ad874b730e22316e0057"
             }
           ]
         },
@@ -4025,12 +3650,17 @@
     },
     {
       "type": "library",
-      "name": "binding-linux-x64-gnu",
-      "version": "1.0.0-rc.7",
-      "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.0.0-rc.7",
-      "bom-ref": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.0.0-rc.7",
-      "group": "@rolldown",
-      "description": "Fast JavaScript/TypeScript bundler in Rust with Rollup-compatible API.",
+      "name": "generator",
+      "version": "8.0.0-rc.2",
+      "purl": "pkg:npm/%40babel/generator@8.0.0-rc.2",
+      "bom-ref": "pkg:npm/%40babel/generator@8.0.0-rc.2",
+      "group": "@babel",
+      "description": "Turns an AST into code.",
+      "authors": [
+        {
+          "name": "The Babel Team"
+        }
+      ],
       "licenses": [
         {
           "license": {
@@ -4041,11 +3671,68 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.0.0-rc.7.tgz",
+          "url": "https://registry.npmjs.org/@babel/generator/-/generator-8.0.0-rc.2.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "d531dbe8574190010bd76cef52e7b66e62b85b5f8ffadcfc3e0bb9b84ceafb1aed61ade20739a628d9727d4cc214d0aab0f77c589110ad874b730e22316e0057"
+              "content": "a0243520a3f093309e27300f6fb16ff2b43d939fb5b06f267f6ba81e23089cf62f9117eb0c9c5b4c86c7e7553e8ecb6592086eb34bc08b7101be47ef12c60d2d"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://babel.dev/docs/en/next/babel-generator"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/babel/babel.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pluginutils",
+      "version": "1.0.0-rc.7",
+      "purl": "pkg:npm/%40rolldown/pluginutils@1.0.0-rc.7",
+      "bom-ref": "pkg:npm/%40rolldown/pluginutils@1.0.0-rc.7",
+      "group": "@rolldown",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.7.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "aae8d17c2f2c1552276123cf30b401c9187bce1c241854b8fadc8c43cdecad5d6aaf12f883c136b72c55572c5dd3ef1078133598893d29b5b191e811afbe97cc"
             }
           ]
         },
@@ -4141,14 +3828,15 @@
     },
     {
       "type": "library",
-      "name": "fdir",
-      "version": "6.5.0",
-      "purl": "pkg:npm/fdir@6.5.0",
-      "bom-ref": "pkg:npm/fdir@6.5.0",
-      "description": "The fastest directory crawler & globbing alternative to glob, fast-glob, & tiny-glob. Crawls 1m files in < 1s",
+      "name": "helper-validator-identifier",
+      "version": "8.0.0-rc.2",
+      "purl": "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
+      "bom-ref": "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
+      "group": "@babel",
+      "description": "Validate identifier/keywords name",
       "authors": [
         {
-          "name": "thecodrr"
+          "name": "The Babel Team"
         }
       ],
       "licenses": [
@@ -4161,21 +3849,333 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz",
+          "url": "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-8.0.0-rc.2.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "b486d8b596ee70eb340511aa3c992c84951874bf920c7edd54cf208f2f84469dd60148cb105244fb4da46a7c87b708d63a7c2b298062c0098cd29e242c90275e"
+              "content": "c44c54064b975898d5b886ceef3eaaeff040f5b81f24312154bd2082b8202cc6e0d08cc2516193d6164613ca941fb225eff443fdae9c67700016bae5a752c5fc"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://github.com/thecodrr/fdir#readme"
+          "url": "https://github.com/babel/babel#readme"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/thecodrr/fdir.git"
+          "url": "git+https://github.com/babel/babel.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "parser",
+      "version": "8.0.0-rc.2",
+      "purl": "pkg:npm/%40babel/parser@8.0.0-rc.2",
+      "bom-ref": "pkg:npm/%40babel/parser@8.0.0-rc.2",
+      "group": "@babel",
+      "description": "A JavaScript parser",
+      "authors": [
+        {
+          "name": "The Babel Team"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@babel/parser/-/parser-8.0.0-rc.2.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "dbd02112d72ae31f03a774fbdaabd43191f1d0e3170a3e09cbf4c445e41af8a58b967e76e028f57d66f74058b497fc52a69b50051eb2f513445eec6916fc2251"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://babel.dev/docs/en/next/babel-parser"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/babel/babel.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "types",
+      "version": "8.0.0-rc.2",
+      "purl": "pkg:npm/%40babel/types@8.0.0-rc.2",
+      "bom-ref": "pkg:npm/%40babel/types@8.0.0-rc.2",
+      "group": "@babel",
+      "description": "Babel Types is a Lodash-esque utility library for AST nodes",
+      "authors": [
+        {
+          "name": "The Babel Team"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@babel/types/-/types-8.0.0-rc.2.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "f758006964739c3c125f8136b59d588c1b887e74153850c2436af44e86f2d20bb85c46f217adb79172cc03c77865b0aef9f20d72bb9d92611cc125078030e437"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://babel.dev/docs/en/next/babel-types"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/babel/babel.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ast-kit",
+      "version": "3.0.0-beta.1",
+      "purl": "pkg:npm/ast-kit@3.0.0-beta.1",
+      "bom-ref": "pkg:npm/ast-kit@3.0.0-beta.1",
+      "description": "A toolkit for easy Babel AST generation and manipulation.",
+      "authors": [
+        {
+          "name": "Kevin Deng"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/ast-kit/-/ast-kit-3.0.0-beta.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "b6b9a57809d9d8fc4dfe5a07595861c75a9e3874915eae130ec041c6adc6a9e262b5f937fa34d0faffc2d649bf298abd33bc0aa827b0321fbf340bd51fb9be6f"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/sxzz/ast-kit#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/sxzz/ast-kit.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "birpc",
+      "version": "4.0.0",
+      "purl": "pkg:npm/birpc@4.0.0",
+      "bom-ref": "pkg:npm/birpc@4.0.0",
+      "description": "Message based Two-way remote procedure call",
+      "authors": [
+        {
+          "name": "Anthony Fu"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/birpc/-/birpc-4.0.0.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "2d2852c493f429399dd74d5be834721818f9ecb6714836162a2b50356fe68bc19132f65bd3bf147fdfa9bde6b1d43ad52fcf6f9bb9967be4e8bdd23f5033ae3f"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/antfu-collective/birpc#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/antfu-collective/birpc.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dts-resolver",
+      "version": "2.1.3",
+      "purl": "pkg:npm/dts-resolver@2.1.3",
+      "bom-ref": "pkg:npm/dts-resolver@2.1.3",
+      "description": "Resolves TypeScript declaration files for dependencies.",
+      "authors": [
+        {
+          "name": "Kevin Deng"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/dts-resolver/-/dts-resolver-2.1.3.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "6e285cee33c2f7456ba2c5cdccad0b4c4d9cb8b3fa8ebd11a3c8e4fa432e80745e2552c8a47cffc5a75eab7321bb0c8ee130f8380dcbd50f29041151734f13b3"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/sxzz/dts-resolver#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/sxzz/dts-resolver.git"
         }
       ],
       "properties": [
@@ -4875,15 +4875,14 @@
     },
     {
       "type": "library",
-      "name": "fs",
-      "version": "1.0.0",
-      "purl": "pkg:npm/%40quansync/fs@1.0.0",
-      "bom-ref": "pkg:npm/%40quansync/fs@1.0.0",
-      "group": "@quansync",
-      "description": "Filesystem utilities for Quansync",
+      "name": "fdir",
+      "version": "6.5.0",
+      "purl": "pkg:npm/fdir@6.5.0",
+      "bom-ref": "pkg:npm/fdir@6.5.0",
+      "description": "The fastest directory crawler & globbing alternative to glob, fast-glob, & tiny-glob. Crawls 1m files in < 1s",
       "authors": [
         {
-          "name": "Kevin Deng"
+          "name": "thecodrr"
         }
       ],
       "licenses": [
@@ -4896,21 +4895,21 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@quansync/fs/-/fs-1.0.0.tgz",
+          "url": "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "e132770c5b657f52f92c331a33a09a9c9ff495c90636d25c32343534057acc3980d2d107299b7134a8a7f0480f6955f56339636f1724c93dad26ba50280b6781"
+              "content": "b486d8b596ee70eb340511aa3c992c84951874bf920c7edd54cf208f2f84469dd60148cb105244fb4da46a7c87b708d63a7c2b298062c0098cd29e242c90275e"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://github.com/quansync-dev/fs#readme"
+          "url": "https://github.com/thecodrr/fdir#readme"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/quansync-dev/fs.git"
+          "url": "git+https://github.com/thecodrr/fdir.git"
         }
       ],
       "properties": [
@@ -5316,6 +5315,69 @@
     },
     {
       "type": "library",
+      "name": "fs",
+      "version": "1.0.0",
+      "purl": "pkg:npm/%40quansync/fs@1.0.0",
+      "bom-ref": "pkg:npm/%40quansync/fs@1.0.0",
+      "group": "@quansync",
+      "description": "Filesystem utilities for Quansync",
+      "authors": [
+        {
+          "name": "Kevin Deng"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@quansync/fs/-/fs-1.0.0.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "e132770c5b657f52f92c331a33a09a9c9ff495c90636d25c32343534057acc3980d2d107299b7134a8a7f0480f6955f56339636f1724c93dad26ba50280b6781"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/quansync-dev/fs#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/quansync-dev/fs.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "quansync",
       "version": "1.0.0",
       "purl": "pkg:npm/quansync@1.0.0",
@@ -5351,68 +5413,6 @@
         {
           "type": "vcs",
           "url": "git+https://github.com/quansync-dev/quansync.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "mri",
-      "version": "1.2.0",
-      "purl": "pkg:npm/mri@1.2.0",
-      "bom-ref": "pkg:npm/mri@1.2.0",
-      "description": "Quickly scan for CLI flags and arguments",
-      "authors": [
-        {
-          "name": "Luke Edwards"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/mri/-/mri-1.2.0.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "b73cec91bddb1bc2ef606145fe60d3a6ade3a48e90f707372c49816a086ef83742b2c77515a90dec17348553661321aad5bab74607e409bddc9902e934f3aba0"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/lukeed/mri#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/lukeed/mri.git"
         }
       ],
       "properties": [
@@ -5498,68 +5498,6 @@
     },
     {
       "type": "library",
-      "name": "resolve-pkg-maps",
-      "version": "1.0.0",
-      "purl": "pkg:npm/resolve-pkg-maps@1.0.0",
-      "bom-ref": "pkg:npm/resolve-pkg-maps@1.0.0",
-      "description": "Resolve package.json exports & imports maps",
-      "authors": [
-        {
-          "name": "Hiroki Osame"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/resolve-pkg-maps/-/resolve-pkg-maps-1.0.0.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "b1e4b64e3dba4c154e0b6348736ace7b6cb664eede7f1213b4b65c1923a71c734e43b0a489405fc34230d9c93ac642213f02e128d2d2f013be844a6781096acf"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/privatenumber/resolve-pkg-maps#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/privatenumber/resolve-pkg-maps.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "file-uri-to-path",
       "version": "1.0.0",
       "purl": "pkg:npm/file-uri-to-path@1.0.0",
@@ -5609,6 +5547,68 @@
         {
           "name": "sbom:relationship",
           "value": "transitive runtime dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "resolve-pkg-maps",
+      "version": "1.0.0",
+      "purl": "pkg:npm/resolve-pkg-maps@1.0.0",
+      "bom-ref": "pkg:npm/resolve-pkg-maps@1.0.0",
+      "description": "Resolve package.json exports & imports maps",
+      "authors": [
+        {
+          "name": "Hiroki Osame"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/resolve-pkg-maps/-/resolve-pkg-maps-1.0.0.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "b1e4b64e3dba4c154e0b6348736ace7b6cb664eede7f1213b4b65c1923a71c734e43b0a489405fc34230d9c93ac642213f02e128d2d2f013be844a6781096acf"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/privatenumber/resolve-pkg-maps#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/privatenumber/resolve-pkg-maps.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
         },
         {
           "name": "sbom:metadata-source",
@@ -5930,6 +5930,68 @@
     },
     {
       "type": "library",
+      "name": "node-abi",
+      "version": "3.92.0",
+      "purl": "pkg:npm/node-abi@3.92.0",
+      "bom-ref": "pkg:npm/node-abi@3.92.0",
+      "description": "Get the Node ABI for a given target and runtime, and vice versa.",
+      "authors": [
+        {
+          "name": "Lukas Geiger"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/node-abi/-/node-abi-3.92.0.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "29d1ef15666310a0dfd1c6a48058de6e5dfbd463ec2125f6a191dcbb22aa33b0eda2022c1eba8a78b4e8f30047c5a5d1010958d8fb0f95999fa3ef590b111111"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/electron/node-abi#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/electron/node-abi.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive runtime dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "napi-build-utils",
       "version": "2.0.0",
       "purl": "pkg:npm/napi-build-utils@2.0.0",
@@ -6027,68 +6089,6 @@
         {
           "type": "vcs",
           "url": "git://github.com/mafintosh/pump.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive runtime dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "node-abi",
-      "version": "3.92.0",
-      "purl": "pkg:npm/node-abi@3.92.0",
-      "bom-ref": "pkg:npm/node-abi@3.92.0",
-      "description": "Get the Node ABI for a given target and runtime, and vice versa.",
-      "authors": [
-        {
-          "name": "Lukas Geiger"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/node-abi/-/node-abi-3.92.0.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "29d1ef15666310a0dfd1c6a48058de6e5dfbd463ec2125f6a191dcbb22aa33b0eda2022c1eba8a78b4e8f30047c5a5d1010958d8fb0f95999fa3ef590b111111"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/electron/node-abi#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/electron/node-abi.git"
         }
       ],
       "properties": [
@@ -6425,12 +6425,12 @@
     },
     {
       "type": "library",
-      "name": "langs",
+      "name": "themes",
       "version": "3.23.0",
-      "purl": "pkg:npm/%40shikijs/langs@3.23.0",
-      "bom-ref": "pkg:npm/%40shikijs/langs@3.23.0",
+      "purl": "pkg:npm/%40shikijs/themes@3.23.0",
+      "bom-ref": "pkg:npm/%40shikijs/themes@3.23.0",
       "group": "@shikijs",
-      "description": "TextMate grammars for Shiki in ESM",
+      "description": "TextMate themes for Shiki in ESM",
       "authors": [
         {
           "name": "Anthony Fu"
@@ -6446,11 +6446,11 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@shikijs/langs/-/langs-3.23.0.tgz",
+          "url": "https://registry.npmjs.org/@shikijs/themes/-/themes-3.23.0.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "d84a785b745ee5a075ffad914984089caf663371ec2de07dd5c1eace700932eca5aa3ccd54054232735644716d70d1d7b283516b23fdcf5aa3e12ab79cca985e"
+              "content": "e6ac9261ad598004f5f0747fca910d2fd71448639e236c7ee08bd826ee0981525d8b39fa906e226b94358c310e8bb8136cde116ee62d9878745b779c70eae330"
             }
           ]
         },
@@ -6488,12 +6488,12 @@
     },
     {
       "type": "library",
-      "name": "themes",
+      "name": "langs",
       "version": "3.23.0",
-      "purl": "pkg:npm/%40shikijs/themes@3.23.0",
-      "bom-ref": "pkg:npm/%40shikijs/themes@3.23.0",
+      "purl": "pkg:npm/%40shikijs/langs@3.23.0",
+      "bom-ref": "pkg:npm/%40shikijs/langs@3.23.0",
       "group": "@shikijs",
-      "description": "TextMate themes for Shiki in ESM",
+      "description": "TextMate grammars for Shiki in ESM",
       "authors": [
         {
           "name": "Anthony Fu"
@@ -6509,11 +6509,11 @@
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@shikijs/themes/-/themes-3.23.0.tgz",
+          "url": "https://registry.npmjs.org/@shikijs/langs/-/langs-3.23.0.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "e6ac9261ad598004f5f0747fca910d2fd71448639e236c7ee08bd826ee0981525d8b39fa906e226b94358c310e8bb8136cde116ee62d9878745b779c70eae330"
+              "content": "d84a785b745ee5a075ffad914984089caf663371ec2de07dd5c1eace700932eca5aa3ccd54054232735644716d70d1d7b283516b23fdcf5aa3e12ab79cca985e"
             }
           ]
         },
@@ -6677,6 +6677,63 @@
     },
     {
       "type": "library",
+      "name": "argparse",
+      "version": "2.0.1",
+      "purl": "pkg:npm/argparse@2.0.1",
+      "bom-ref": "pkg:npm/argparse@2.0.1",
+      "description": "CLI arguments parser. Native port of python's argparse.",
+      "licenses": [
+        {
+          "license": {
+            "id": "Python-2.0"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "f3ef56a9e6db173a57f4e47e59ae8edbd6ac22881e44ccdc1ad00835da4c1c7c80835d1fd3969215505b704a867ff3d7c35123019faadbf6c4060dc3beeacadd"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/nodeca/argparse#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/nodeca/argparse.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive runtime dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "entities",
       "version": "4.5.0",
       "purl": "pkg:npm/entities@4.5.0",
@@ -6796,36 +6853,36 @@
     },
     {
       "type": "library",
-      "name": "argparse",
-      "version": "2.0.1",
-      "purl": "pkg:npm/argparse@2.0.1",
-      "bom-ref": "pkg:npm/argparse@2.0.1",
-      "description": "CLI arguments parser. Native port of python's argparse.",
+      "name": "mdurl",
+      "version": "2.0.0",
+      "purl": "pkg:npm/mdurl@2.0.0",
+      "bom-ref": "pkg:npm/mdurl@2.0.0",
+      "description": "URL utilities for markdown-it",
       "licenses": [
         {
           "license": {
-            "id": "Python-2.0"
+            "id": "MIT"
           }
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz",
+          "url": "https://registry.npmjs.org/mdurl/-/mdurl-2.0.0.tgz",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "f3ef56a9e6db173a57f4e47e59ae8edbd6ac22881e44ccdc1ad00835da4c1c7c80835d1fd3969215505b704a867ff3d7c35123019faadbf6c4060dc3beeacadd"
+              "content": "2dffbdfb6afe4dda79c170d70b83dc2018d30edab850a8c23cc421288bb3a49356d1bf7a915a92c16d1b4fb1614527e602215880ff92091bddac3a337e1d14e7"
             }
           ]
         },
         {
           "type": "website",
-          "url": "https://github.com/nodeca/argparse#readme"
+          "url": "https://github.com/markdown-it/mdurl#readme"
         },
         {
           "type": "vcs",
-          "url": "git+https://github.com/nodeca/argparse.git"
+          "url": "git+https://github.com/markdown-it/mdurl.git"
         }
       ],
       "properties": [
@@ -6840,6 +6897,48 @@
         {
           "name": "sbom:relationship",
           "value": "transitive runtime dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wasm-runtime",
+      "version": "1.1.1",
+      "purl": "pkg:npm/%40napi-rs/wasm-runtime@1.1.1",
+      "bom-ref": "pkg:npm/%40napi-rs/wasm-runtime@1.1.1",
+      "group": "@napi-rs",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-1.1.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "a7ae1a87533595df318d6bf7a9bbc5c07885556aead7216f5787fbc3e9b36aa891e08952824aa1711747c2c1a0a26c33047e75b11638344a302f19da063716fc"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
         },
         {
           "name": "sbom:metadata-source",
@@ -6945,63 +7044,6 @@
         {
           "type": "vcs",
           "url": "git+https://github.com/markdown-it/uc.micro.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive runtime dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "mdurl",
-      "version": "2.0.0",
-      "purl": "pkg:npm/mdurl@2.0.0",
-      "bom-ref": "pkg:npm/mdurl@2.0.0",
-      "description": "URL utilities for markdown-it",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/mdurl/-/mdurl-2.0.0.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "2dffbdfb6afe4dda79c170d70b83dc2018d30edab850a8c23cc421288bb3a49356d1bf7a915a92c16d1b4fb1614527e602215880ff92091bddac3a337e1d14e7"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/markdown-it/mdurl#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/markdown-it/mdurl.git"
         }
       ],
       "properties": [
@@ -7337,48 +7379,6 @@
     },
     {
       "type": "library",
-      "name": "wasm-runtime",
-      "version": "1.1.1",
-      "purl": "pkg:npm/%40napi-rs/wasm-runtime@1.1.1",
-      "bom-ref": "pkg:npm/%40napi-rs/wasm-runtime@1.1.1",
-      "group": "@napi-rs",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-1.1.1.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "a7ae1a87533595df318d6bf7a9bbc5c07885556aead7216f5787fbc3e9b36aa891e08952824aa1711747c2c1a0a26c33047e75b11638344a302f19da063716fc"
-            }
-          ]
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "helper-string-parser",
       "version": "8.0.0-rc.2",
       "purl": "pkg:npm/%40babel/helper-string-parser@8.0.0-rc.2",
@@ -7504,6 +7504,63 @@
     },
     {
       "type": "library",
+      "name": "pathe",
+      "version": "2.0.3",
+      "purl": "pkg:npm/pathe@2.0.3",
+      "bom-ref": "pkg:npm/pathe@2.0.3",
+      "description": "Universal filesystem path utils",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/pathe/-/pathe-2.0.3.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "5948c6700a8fd6041a72841ef8e049b0503b2dde03c97b9422367971cef970b1ef27b76d36c4ee8298712000f0b294be02b68051e3c22ab495b4f2c58ff17cf3"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/unjs/pathe#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/unjs/pathe.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "end-of-stream",
       "version": "1.4.5",
       "purl": "pkg:npm/end-of-stream@1.4.5",
@@ -7553,63 +7610,6 @@
         {
           "name": "sbom:relationship",
           "value": "transitive runtime dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "pathe",
-      "version": "2.0.3",
-      "purl": "pkg:npm/pathe@2.0.3",
-      "bom-ref": "pkg:npm/pathe@2.0.3",
-      "description": "Universal filesystem path utils",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/pathe/-/pathe-2.0.3.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "5948c6700a8fd6041a72841ef8e049b0503b2dde03c97b9422367971cef970b1ef27b76d36c4ee8298712000f0b294be02b68051e3c22ab495b4f2c58ff17cf3"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/unjs/pathe#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/unjs/pathe.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
         },
         {
           "name": "sbom:metadata-source",
@@ -7685,68 +7685,6 @@
     },
     {
       "type": "library",
-      "name": "ini",
-      "version": "1.3.8",
-      "purl": "pkg:npm/ini@1.3.8",
-      "bom-ref": "pkg:npm/ini@1.3.8",
-      "description": "An ini encoder/decoder for node",
-      "authors": [
-        {
-          "name": "Isaac Z. Schlueter"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "ISC"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/ini/-/ini-1.3.8.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "255ff2ba0576bb35b988c4528990320ed41dfa7c6d5278de2edd1a70d770f7c90a2ebbee455c81f34b6c444384ef2bc65606a5859e913570a61079142812b17b"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/isaacs/ini#readme"
-        },
-        {
-          "type": "vcs",
-          "url": "git://github.com/isaacs/ini.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive runtime dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "deep-extend",
       "version": "0.6.0",
       "purl": "pkg:npm/deep-extend@0.6.0",
@@ -7782,6 +7720,68 @@
         {
           "type": "vcs",
           "url": "git://github.com/unclechu/node-deep-extend.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive runtime dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ini",
+      "version": "1.3.8",
+      "purl": "pkg:npm/ini@1.3.8",
+      "bom-ref": "pkg:npm/ini@1.3.8",
+      "description": "An ini encoder/decoder for node",
+      "authors": [
+        {
+          "name": "Isaac Z. Schlueter"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/ini/-/ini-1.3.8.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "255ff2ba0576bb35b988c4528990320ed41dfa7c6d5278de2edd1a70d770f7c90a2ebbee455c81f34b6c444384ef2bc65606a5859e913570a61079142812b17b"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/isaacs/ini#readme"
+        },
+        {
+          "type": "vcs",
+          "url": "git://github.com/isaacs/ini.git"
         }
       ],
       "properties": [
@@ -8057,6 +8057,132 @@
     },
     {
       "type": "library",
+      "name": "core",
+      "version": "1.8.1",
+      "purl": "pkg:npm/%40emnapi/core@1.8.1",
+      "bom-ref": "pkg:npm/%40emnapi/core@1.8.1",
+      "group": "@emnapi",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@emnapi/core/-/core-1.8.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "02f4fd405a712b465df09d23a2979d366fb0ff67c8cefb4f28f8eacb0f63c2f05a45e4d3a8f064f478b16b3eca6e38a63fe40dcfad39fd79e315c0c02f6a6a06"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "runtime",
+      "version": "1.8.1",
+      "purl": "pkg:npm/%40emnapi/runtime@1.8.1",
+      "bom-ref": "pkg:npm/%40emnapi/runtime@1.8.1",
+      "group": "@emnapi",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.8.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "99e85f2923168e336897ceb9f59f0ac4432b7522430e8b7949732ad3474cf01378a3e08b357434c47d95ec47213475784666d92e698f74469765ce47d855e60e"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wasm-util",
+      "version": "0.10.1",
+      "purl": "pkg:npm/%40tybys/wasm-util@0.10.1",
+      "bom-ref": "pkg:npm/%40tybys/wasm-util@0.10.1",
+      "group": "@tybys",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "f6d4da3c92d289e8d92b1f819a8838b92b9bb5ea93bc5ad5ad44709261e2c41a341b8b1e0f4cd4c69f7c1350f35012712d0dcd3f05eb18a0e2563c31fc3a4fb2"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "tar-stream",
       "version": "2.2.0",
       "purl": "pkg:npm/tar-stream@2.2.0",
@@ -8239,132 +8365,6 @@
     },
     {
       "type": "library",
-      "name": "core",
-      "version": "1.8.1",
-      "purl": "pkg:npm/%40emnapi/core@1.8.1",
-      "bom-ref": "pkg:npm/%40emnapi/core@1.8.1",
-      "group": "@emnapi",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@emnapi/core/-/core-1.8.1.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "02f4fd405a712b465df09d23a2979d366fb0ff67c8cefb4f28f8eacb0f63c2f05a45e4d3a8f064f478b16b3eca6e38a63fe40dcfad39fd79e315c0c02f6a6a06"
-            }
-          ]
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "runtime",
-      "version": "1.8.1",
-      "purl": "pkg:npm/%40emnapi/runtime@1.8.1",
-      "bom-ref": "pkg:npm/%40emnapi/runtime@1.8.1",
-      "group": "@emnapi",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.8.1.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "99e85f2923168e336897ceb9f59f0ac4432b7522430e8b7949732ad3474cf01378a3e08b357434c47d95ec47213475784666d92e698f74469765ce47d855e60e"
-            }
-          ]
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "wasm-util",
-      "version": "0.10.1",
-      "purl": "pkg:npm/%40tybys/wasm-util@0.10.1",
-      "bom-ref": "pkg:npm/%40tybys/wasm-util@0.10.1",
-      "group": "@tybys",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "f6d4da3c92d289e8d92b1f819a8838b92b9bb5ea93bc5ad5ad44709261e2c41a341b8b1e0f4cd4c69f7c1350f35012712d0dcd3f05eb18a0e2563c31fc3a4fb2"
-            }
-          ]
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "balanced-match",
       "version": "1.0.2",
       "purl": "pkg:npm/balanced-match@1.0.2",
@@ -8526,6 +8526,89 @@
         {
           "type": "vcs",
           "url": "git+https://github.com/jridgewell/resolve-uri.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wasi-threads",
+      "version": "1.1.0",
+      "purl": "pkg:npm/%40emnapi/wasi-threads@1.1.0",
+      "bom-ref": "pkg:npm/%40emnapi/wasi-threads@1.1.0",
+      "group": "@emnapi",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.1.0.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "588d03759f311526e0323475b05b0a00127f0b93a746b8d3d3a2576d929ec491ab0ee3d3cd974361f165b207025c2c9ffacb86e505367bfcb55a8d95fce6a92d"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive development dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tslib",
+      "version": "2.8.1",
+      "purl": "pkg:npm/tslib@2.8.1",
+      "bom-ref": "pkg:npm/tslib@2.8.1",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "a0916ef781d06fe29576e49440bef09e99aa9df98bb0e03f9c087a6fa107d30084a0ad3f98f79753a737c0a0d5f373243ae1cf447b525ca294f7d2016b34bfdb"
+            }
+          ]
         }
       ],
       "properties": [
@@ -8854,89 +8937,6 @@
     },
     {
       "type": "library",
-      "name": "wasi-threads",
-      "version": "1.1.0",
-      "purl": "pkg:npm/%40emnapi/wasi-threads@1.1.0",
-      "bom-ref": "pkg:npm/%40emnapi/wasi-threads@1.1.0",
-      "group": "@emnapi",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.1.0.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "588d03759f311526e0323475b05b0a00127f0b93a746b8d3d3a2576d929ec491ab0ee3d3cd974361f165b207025c2c9ffacb86e505367bfcb55a8d95fce6a92d"
-            }
-          ]
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "tslib",
-      "version": "2.8.1",
-      "purl": "pkg:npm/tslib@2.8.1",
-      "bom-ref": "pkg:npm/tslib@2.8.1",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "a0916ef781d06fe29576e49440bef09e99aa9df98bb0e03f9c087a6fa107d30084a0ad3f98f79753a737c0a0d5f373243ae1cf447b525ca294f7d2016b34bfdb"
-            }
-          ]
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive development dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
       "name": "inherits",
       "version": "2.0.4",
       "purl": "pkg:npm/inherits@2.0.4",
@@ -9024,6 +9024,64 @@
         {
           "type": "vcs",
           "url": "git://github.com/nodejs/readable-stream.git"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbom:repository",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
+        },
+        {
+          "name": "sbom:ecosystem",
+          "value": "npm"
+        },
+        {
+          "name": "sbom:relationship",
+          "value": "transitive runtime dependency"
+        },
+        {
+          "name": "sbom:metadata-source",
+          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
+        },
+        {
+          "name": "sbom:notes",
+          "value": "Generated by pnpm's native CycloneDX SBOM command."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unist",
+      "version": "3.0.3",
+      "purl": "pkg:npm/%40types/unist@3.0.3",
+      "bom-ref": "pkg:npm/%40types/unist@3.0.3",
+      "group": "@types",
+      "description": "TypeScript definitions for unist",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@types/unist/-/unist-3.0.3.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "928fe0205251bf5efb5e066c65c0709ea24de71fc689e9fca8d3a7d03e5b414ff303355ff59b7706571488baa157dcb801193419b4f7b675223cd8274d7cdcfd"
+            }
+          ]
+        },
+        {
+          "type": "website",
+          "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/unist"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/DefinitelyTyped/DefinitelyTyped.git"
         }
       ],
       "properties": [
@@ -9148,64 +9206,6 @@
         {
           "type": "vcs",
           "url": "git://github.com/TooTallNate/util-deprecate.git"
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbom:repository",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
-        },
-        {
-          "name": "sbom:ecosystem",
-          "value": "npm"
-        },
-        {
-          "name": "sbom:relationship",
-          "value": "transitive runtime dependency"
-        },
-        {
-          "name": "sbom:metadata-source",
-          "value": "Regensburg_DigitalerEnergieZwilling_OfflineEnrichment/pnpm-lock.yaml and installed package metadata"
-        },
-        {
-          "name": "sbom:notes",
-          "value": "Generated by pnpm's native CycloneDX SBOM command."
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "unist",
-      "version": "3.0.3",
-      "purl": "pkg:npm/%40types/unist@3.0.3",
-      "bom-ref": "pkg:npm/%40types/unist@3.0.3",
-      "group": "@types",
-      "description": "TypeScript definitions for unist",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@types/unist/-/unist-3.0.3.tgz",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "928fe0205251bf5efb5e066c65c0709ea24de71fc689e9fca8d3a7d03e5b414ff303355ff59b7706571488baa157dcb801193419b4f7b675223cd8274d7cdcfd"
-            }
-          ]
-        },
-        {
-          "type": "website",
-          "url": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/unist"
-        },
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/DefinitelyTyped/DefinitelyTyped.git"
         }
       ],
       "properties": [
@@ -9414,9 +9414,9 @@
     },
     {
       "type": "container",
-      "bom-ref": "oci:node:22-alpine",
+      "bom-ref": "oci:node:22.23.4-alpine3.24",
       "name": "node",
-      "version": "22-alpine (not digest pinned)",
+      "version": "22.23.4-alpine3.24 (not digest pinned)",
       "scope": "required",
       "licenses": [
         {
@@ -9493,10 +9493,10 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:npm/%40csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment@0.7.0",
+      "ref": "pkg:npm/%40csi-foxbyte/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment@0.9.2",
       "dependsOn": [
         "component:alpine:libspatialite@not-pinned",
-        "oci:node:22-alpine",
+        "oci:node:22.23.4-alpine3.24",
         "pkg:npm/%40types/better-sqlite3@7.6.13",
         "pkg:npm/%40types/node@25.3.3",
         "pkg:npm/better-sqlite3@11.10.0",
@@ -9516,9 +9516,12 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40types/node@25.3.3",
+      "ref": "pkg:npm/publint@0.3.18",
       "dependsOn": [
-        "pkg:npm/undici-types@7.18.2"
+        "pkg:npm/%40publint/pack@0.1.4",
+        "pkg:npm/package-manager-detector@1.6.0",
+        "pkg:npm/picocolors@1.1.1",
+        "pkg:npm/sade@1.8.1"
       ]
     },
     {
@@ -9543,12 +9546,9 @@
       ]
     },
     {
-      "ref": "pkg:npm/publint@0.3.18",
+      "ref": "pkg:npm/%40types/node@25.3.3",
       "dependsOn": [
-        "pkg:npm/%40publint/pack@0.1.4",
-        "pkg:npm/package-manager-detector@1.6.0",
-        "pkg:npm/picocolors@1.1.1",
-        "pkg:npm/sade@1.8.1"
+        "pkg:npm/undici-types@7.18.2"
       ]
     },
     {
@@ -9589,10 +9589,6 @@
       ]
     },
     {
-      "ref": "pkg:npm/typedoc-plugin-markdown@4.10.0",
-      "dependsOn": []
-    },
-    {
       "ref": "pkg:npm/typedoc@0.28.17",
       "dependsOn": [
         "pkg:npm/%40gerrit0/mini-shiki@3.23.0",
@@ -9603,8 +9599,26 @@
       ]
     },
     {
-      "ref": "pkg:npm/undici-types@7.18.2",
+      "ref": "pkg:npm/typedoc-plugin-markdown@4.10.0",
       "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40publint/pack@0.1.4",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/package-manager-detector@1.6.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/picocolors@1.1.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/sade@1.8.1",
+      "dependsOn": [
+        "pkg:npm/mri@1.2.0"
+      ]
     },
     {
       "ref": "pkg:npm/ansis@4.2.0",
@@ -9639,18 +9653,6 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/rolldown-plugin-dts@0.22.3",
-      "dependsOn": [
-        "pkg:npm/%40babel/generator@8.0.0-rc.2",
-        "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
-        "pkg:npm/%40babel/parser@8.0.0-rc.2",
-        "pkg:npm/%40babel/types@8.0.0-rc.2",
-        "pkg:npm/ast-kit@3.0.0-beta.1",
-        "pkg:npm/birpc@4.0.0",
-        "pkg:npm/dts-resolver@2.1.3"
-      ]
-    },
-    {
       "ref": "pkg:npm/rolldown@1.0.0-rc.7",
       "dependsOn": [
         "pkg:npm/%40oxc-project/types@0.115.0",
@@ -9670,6 +9672,18 @@
         "pkg:npm/%40rolldown/binding-wasm32-wasi@1.0.0-rc.7",
         "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.0.0-rc.7",
         "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.0.0-rc.7"
+      ]
+    },
+    {
+      "ref": "pkg:npm/rolldown-plugin-dts@0.22.3",
+      "dependsOn": [
+        "pkg:npm/%40babel/generator@8.0.0-rc.2",
+        "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
+        "pkg:npm/%40babel/parser@8.0.0-rc.2",
+        "pkg:npm/%40babel/types@8.0.0-rc.2",
+        "pkg:npm/ast-kit@3.0.0-beta.1",
+        "pkg:npm/birpc@4.0.0",
+        "pkg:npm/dts-resolver@2.1.3"
       ]
     },
     {
@@ -9702,26 +9716,12 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40publint/pack@0.1.4",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/package-manager-detector@1.6.0",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/picocolors@1.1.1",
-      "dependsOn": []
-    },
-    {
       "ref": "pkg:npm/fsevents@2.3.3",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/sade@1.8.1",
-      "dependsOn": [
-        "pkg:npm/mri@1.2.0"
-      ]
+      "ref": "pkg:npm/undici-types@7.18.2",
+      "dependsOn": []
     },
     {
       "ref": "pkg:npm/esbuild@0.27.3",
@@ -9835,40 +9835,6 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40babel/generator@8.0.0-rc.2",
-      "dependsOn": [
-        "pkg:npm/%40jridgewell/gen-mapping@0.3.13",
-        "pkg:npm/%40jridgewell/trace-mapping@0.3.31",
-        "pkg:npm/%40types/jsesc@2.5.1",
-        "pkg:npm/jsesc@3.1.0"
-      ]
-    },
-    {
-      "ref": "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/%40babel/parser@8.0.0-rc.2",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/%40babel/types@8.0.0-rc.2",
-      "dependsOn": [
-        "pkg:npm/%40babel/helper-string-parser@8.0.0-rc.2"
-      ]
-    },
-    {
-      "ref": "pkg:npm/ast-kit@3.0.0-beta.1",
-      "dependsOn": [
-        "pkg:npm/estree-walker@3.0.3",
-        "pkg:npm/pathe@2.0.3"
-      ]
-    },
-    {
-      "ref": "pkg:npm/birpc@4.0.0",
-      "dependsOn": []
-    },
-    {
       "ref": "pkg:npm/%40rolldown/binding-android-arm64@1.0.0-rc.7",
       "dependsOn": []
     },
@@ -9905,7 +9871,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/dts-resolver@2.1.3",
+      "ref": "pkg:npm/mri@1.2.0",
       "dependsOn": []
     },
     {
@@ -9931,11 +9897,20 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40rolldown/pluginutils@1.0.0-rc.7",
+      "ref": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.0.0-rc.7",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.0.0-rc.7",
+      "ref": "pkg:npm/%40babel/generator@8.0.0-rc.2",
+      "dependsOn": [
+        "pkg:npm/%40jridgewell/gen-mapping@0.3.13",
+        "pkg:npm/%40jridgewell/trace-mapping@0.3.31",
+        "pkg:npm/%40types/jsesc@2.5.1",
+        "pkg:npm/jsesc@3.1.0"
+      ]
+    },
+    {
+      "ref": "pkg:npm/%40rolldown/pluginutils@1.0.0-rc.7",
       "dependsOn": []
     },
     {
@@ -9943,7 +9918,32 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/fdir@6.5.0",
+      "ref": "pkg:npm/%40babel/helper-validator-identifier@8.0.0-rc.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40babel/parser@8.0.0-rc.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40babel/types@8.0.0-rc.2",
+      "dependsOn": [
+        "pkg:npm/%40babel/helper-string-parser@8.0.0-rc.2"
+      ]
+    },
+    {
+      "ref": "pkg:npm/ast-kit@3.0.0-beta.1",
+      "dependsOn": [
+        "pkg:npm/estree-walker@3.0.3",
+        "pkg:npm/pathe@2.0.3"
+      ]
+    },
+    {
+      "ref": "pkg:npm/birpc@4.0.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/dts-resolver@2.1.3",
       "dependsOn": []
     },
     {
@@ -10011,7 +10011,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40quansync/fs@1.0.0",
+      "ref": "pkg:npm/fdir@6.5.0",
       "dependsOn": []
     },
     {
@@ -10051,11 +10051,11 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/quansync@1.0.0",
+      "ref": "pkg:npm/%40quansync/fs@1.0.0",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/mri@1.2.0",
+      "ref": "pkg:npm/quansync@1.0.0",
       "dependsOn": []
     },
     {
@@ -10063,11 +10063,11 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/resolve-pkg-maps@1.0.0",
+      "ref": "pkg:npm/file-uri-to-path@1.0.0",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/file-uri-to-path@1.0.0",
+      "ref": "pkg:npm/resolve-pkg-maps@1.0.0",
       "dependsOn": []
     },
     {
@@ -10091,6 +10091,10 @@
       "dependsOn": []
     },
     {
+      "ref": "pkg:npm/node-abi@3.92.0",
+      "dependsOn": []
+    },
+    {
       "ref": "pkg:npm/napi-build-utils@2.0.0",
       "dependsOn": []
     },
@@ -10100,10 +10104,6 @@
         "pkg:npm/end-of-stream@1.4.5",
         "pkg:npm/once@1.4.0"
       ]
-    },
-    {
-      "ref": "pkg:npm/node-abi@3.92.0",
-      "dependsOn": []
     },
     {
       "ref": "pkg:npm/rc@1.2.8",
@@ -10138,11 +10138,11 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40shikijs/langs@3.23.0",
+      "ref": "pkg:npm/%40shikijs/themes@3.23.0",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40shikijs/themes@3.23.0",
+      "ref": "pkg:npm/%40shikijs/langs@3.23.0",
       "dependsOn": []
     },
     {
@@ -10156,6 +10156,10 @@
       "dependsOn": []
     },
     {
+      "ref": "pkg:npm/argparse@2.0.1",
+      "dependsOn": []
+    },
+    {
       "ref": "pkg:npm/entities@4.5.0",
       "dependsOn": []
     },
@@ -10164,8 +10168,16 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/argparse@2.0.1",
+      "ref": "pkg:npm/mdurl@2.0.0",
       "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40napi-rs/wasm-runtime@1.1.1",
+      "dependsOn": [
+        "pkg:npm/%40emnapi/core@1.8.1",
+        "pkg:npm/%40emnapi/runtime@1.8.1",
+        "pkg:npm/%40tybys/wasm-util@0.10.1"
+      ]
     },
     {
       "ref": "pkg:npm/punycode.js@2.3.1",
@@ -10173,10 +10185,6 @@
     },
     {
       "ref": "pkg:npm/uc.micro@2.1.0",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/mdurl@2.0.0",
       "dependsOn": []
     },
     {
@@ -10206,14 +10214,6 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40napi-rs/wasm-runtime@1.1.1",
-      "dependsOn": [
-        "pkg:npm/%40emnapi/core@1.8.1",
-        "pkg:npm/%40emnapi/runtime@1.8.1",
-        "pkg:npm/%40tybys/wasm-util@0.10.1"
-      ]
-    },
-    {
       "ref": "pkg:npm/%40babel/helper-string-parser@8.0.0-rc.2",
       "dependsOn": []
     },
@@ -10224,11 +10224,11 @@
       ]
     },
     {
-      "ref": "pkg:npm/end-of-stream@1.4.5",
+      "ref": "pkg:npm/pathe@2.0.3",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/pathe@2.0.3",
+      "ref": "pkg:npm/end-of-stream@1.4.5",
       "dependsOn": []
     },
     {
@@ -10238,11 +10238,11 @@
       ]
     },
     {
-      "ref": "pkg:npm/ini@1.3.8",
+      "ref": "pkg:npm/deep-extend@0.6.0",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/deep-extend@0.6.0",
+      "ref": "pkg:npm/ini@1.3.8",
       "dependsOn": []
     },
     {
@@ -10261,6 +10261,21 @@
     },
     {
       "ref": "pkg:npm/chownr@1.1.4",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40emnapi/core@1.8.1",
+      "dependsOn": [
+        "pkg:npm/%40emnapi/wasi-threads@1.1.0",
+        "pkg:npm/tslib@2.8.1"
+      ]
+    },
+    {
+      "ref": "pkg:npm/%40emnapi/runtime@1.8.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40tybys/wasm-util@0.10.1",
       "dependsOn": []
     },
     {
@@ -10283,21 +10298,6 @@
       ]
     },
     {
-      "ref": "pkg:npm/%40emnapi/core@1.8.1",
-      "dependsOn": [
-        "pkg:npm/%40emnapi/wasi-threads@1.1.0",
-        "pkg:npm/tslib@2.8.1"
-      ]
-    },
-    {
-      "ref": "pkg:npm/%40emnapi/runtime@1.8.1",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/%40tybys/wasm-util@0.10.1",
-      "dependsOn": []
-    },
-    {
       "ref": "pkg:npm/balanced-match@1.0.2",
       "dependsOn": []
     },
@@ -10307,6 +10307,14 @@
     },
     {
       "ref": "pkg:npm/%40jridgewell/resolve-uri@3.1.2",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/%40emnapi/wasi-threads@1.1.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/tslib@2.8.1",
       "dependsOn": []
     },
     {
@@ -10332,14 +10340,6 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40emnapi/wasi-threads@1.1.0",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/tslib@2.8.1",
-      "dependsOn": []
-    },
-    {
       "ref": "pkg:npm/inherits@2.0.4",
       "dependsOn": []
     },
@@ -10351,6 +10351,10 @@
       ]
     },
     {
+      "ref": "pkg:npm/%40types/unist@3.0.3",
+      "dependsOn": []
+    },
+    {
       "ref": "pkg:npm/buffer@5.7.1",
       "dependsOn": [
         "pkg:npm/base64-js@1.5.1",
@@ -10359,10 +10363,6 @@
     },
     {
       "ref": "pkg:npm/util-deprecate@1.0.2",
-      "dependsOn": []
-    },
-    {
-      "ref": "pkg:npm/%40types/unist@3.0.3",
       "dependsOn": []
     },
     {

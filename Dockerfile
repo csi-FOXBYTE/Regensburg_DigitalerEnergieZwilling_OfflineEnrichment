@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:22.23.4-alpine3.24 AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm prune --prod
 
-FROM node:22-alpine AS runtime
+FROM node:22.23.4-alpine3.24 AS runtime
 
 LABEL org.opencontainers.image.licenses="LGPL-3.0-or-later" \
       org.opencontainers.image.source="https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_OfflineEnrichment"
@@ -31,5 +31,6 @@ COPY package.json ./
 COPY --from=builder /app/LICENSE /app/COPYING /app/COPYING.LESSER /app/NOTICE ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY SBOM.cdx.json /usr/share/regensburg/SBOM.cdx.json
 
 CMD ["node", "dist/cli.mjs", "--src", "/data"]

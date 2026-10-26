@@ -2,9 +2,9 @@
   "additionalComponents": [
     {
       "type": "container",
-      "bom-ref": "oci:node:22-alpine",
+      "bom-ref": "oci:node:22.23.4-alpine3.24",
       "name": "node",
-      "version": "22-alpine (not digest pinned)",
+      "version": "22.23.4-alpine3.24 (not digest pinned)",
       "scope": "required",
       "ecosystem": "OCI container",
       "relationship": "referenced runtime/build software",

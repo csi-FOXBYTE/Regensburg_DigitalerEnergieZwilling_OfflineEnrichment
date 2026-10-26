@@ -6,7 +6,7 @@
       "moby": false
     },
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "22",
+      "version": "22.23.4",
       "pnpmVersion": "11.3.0"
     }
   },
