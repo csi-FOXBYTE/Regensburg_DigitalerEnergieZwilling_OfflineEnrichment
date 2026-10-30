@@ -1,3 +1,4 @@
+import { evaluateRunResult } from "./cli-report.js";
 import { spatialConfig } from "./config/spatial.js";
 import { processCityJsonFiles } from "./index.js";
 
@@ -86,7 +87,7 @@ function parseCliOptions(): CliOptions {
  */
 function printUsage(): void {
   console.log(`Usage:
-  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback ${spatialConfig.analysisCrs}] [--address-output /data/addresses.sqlite] [--municipality-key 09362000] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg]
+  node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback ${spatialConfig.analysisCrs}] [--address-output /data/addresses.sqlite] [--municipality-key 09362000] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg] [--strict]
 
 Environment alternatives:
   INPUT_DIR=/data
@@ -97,7 +98,8 @@ Environment alternatives:
   ADDRESS_OUTPUT=/data/addresses.sqlite
   MUNICIPALITY_KEY=09362000
   AGE_ZONES_FILE=/data/Baualtersklassen.gpkg
-  GEOTHERMAL_FILE=/data/geothermal.gpkg`);
+  GEOTHERMAL_FILE=/data/geothermal.gpkg
+  STRICT=1   # exit non-zero if any file is skipped`);
 }
 
 /**
@@ -124,6 +126,11 @@ async function main(): Promise<void> {
   });
 
   console.log(JSON.stringify(result, null, 2));
+
+  const strict = process.argv.includes("--strict") || process.env.STRICT === "1";
+  const report = evaluateRunResult(result, strict);
+  console.error(report.message);
+  process.exitCode = report.exitCode;
 }
 
 /**
