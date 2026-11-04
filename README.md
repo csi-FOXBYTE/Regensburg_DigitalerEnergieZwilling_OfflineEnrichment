@@ -95,8 +95,10 @@ confirmation box stating that it will use the committed package version. The
 workflow stops if that version already has a tag. It regenerates both SBOMs with
 Node.js 22.23.4 and pnpm 11.3.0, saves them as a workflow artifact, commits them
 to `main`, and tags that release commit with the package version. It builds the
-image from that exact commit, embeds `SBOM.cdx.json`, and produces a BuildKit SBOM
-attestation. Tag pushes and other commits do not start the workflow. The image
+image from that exact commit, embeds the runtime part of `SBOM.cdx.json` (the
+npm packages installed in the image plus the base image and system packages,
+derived by `scripts/runtime-sbom.mjs`) at `/usr/share/regensburg/SBOM.cdx.json`,
+and produces a BuildKit SBOM attestation. Tag pushes and other commits do not start the workflow. The image
 does not include an audit receipt.
 A full ScanCode/SPDX compliance audit must be run separately when preparing
 an openCode publication; normal image builds do not run it.
@@ -212,6 +214,8 @@ docker run --rm \
 
 The image runs as the non-root user `node` (uid/gid 1000). The mounted folders
 must be writable by that user, or pass a matching `--user "$(id -u):$(id -g)"`.
+It contains only the production dependencies and `node`; the base image's
+package managers (npm, npx, corepack, yarn) are removed.
 
 With adjacency pass and separate output:
 
