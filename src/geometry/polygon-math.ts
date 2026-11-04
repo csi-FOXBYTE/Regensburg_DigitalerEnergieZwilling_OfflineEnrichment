@@ -226,6 +226,30 @@ interface WeightedPolygon {
   weight: number;
 }
 
+/** Axis-aligned bounding box `[minX, minY, maxX, maxY]`. */
+type Bbox2d = [number, number, number, number];
+
+function bbox2d(rings: Vec2[][]): Bbox2d {
+  const box: Bbox2d = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const ring of rings) {
+    for (const [x, y] of ring) {
+      if (x < box[0]) box[0] = x;
+      if (y < box[1]) box[1] = y;
+      if (x > box[2]) box[2] = x;
+      if (y > box[3]) box[3] = y;
+    }
+  }
+  return box;
+}
+
+/**
+ * True when two boxes are strictly separated. Touching boxes still count as
+ * overlapping, so only pairs whose clipped intersection is empty are skipped.
+ */
+function bboxesDisjoint(a: Bbox2d, b: Bbox2d): boolean {
+  return a[2] < b[0] || b[2] < a[0] || a[3] < b[1] || b[3] < a[1];
+}
+
 /**
  * Represents a polygon by signed convex pieces. A concave ring's signed
  * triangle fan has the same winding coverage as the ring, including where
@@ -264,6 +288,17 @@ export interface WallFaceIntersectionAreas {
   belowB: number | null;
 }
 
+/** Tuning switches for {@link wallFaceIntersectionAreas}. */
+export interface WallFaceIntersectionOptions {
+  /**
+   * Skip wall pairs and convex-piece pairs whose projected bounding boxes are
+   * strictly disjoint before clipping. Their intersection is empty, so results
+   * do not change; disabling it exists only to verify that equivalence.
+   * Defaults to true.
+   */
+  bboxPrefilter?: boolean;
+}
+
 /**
  * Intersects complete wall polygons, including holes, in a common local plane.
  * Normals must oppose within 1 degree and vertices must meet the plane-distance
@@ -278,6 +313,7 @@ export function wallFaceIntersectionAreas(
   distanceTolerance = 0.15,
   splitHeightA: number | null = null,
   splitHeightB: number | null = null,
+  { bboxPrefilter = true }: WallFaceIntersectionOptions = {},
 ): WallFaceIntersectionAreas {
   const empty = {
     area: 0,
@@ -309,8 +345,13 @@ export function wallFaceIntersectionAreas(
   // Keep clipping coordinates local to avoid cancellation with large CRS coordinates.
   const project = (rings: Vertex[][]) => rings.map((ring) =>
     ring.map((v) => projectVertex(vectorSubtract(v, originA), u, w)));
-  const piecesA = convexPieces(project(ringsA));
-  const piecesB = convexPieces(project(ringsB));
+  const projectedA = project(ringsA);
+  const projectedB = project(ringsB);
+  if (bboxPrefilter && bboxesDisjoint(bbox2d(projectedA), bbox2d(projectedB))) return empty;
+  const piecesA = convexPieces(projectedA);
+  const piecesB = convexPieces(projectedB);
+  const boxesA = bboxPrefilter ? piecesA.map((piece) => bbox2d([piece.ring])) : [];
+  const boxesB = bboxPrefilter ? piecesB.map((piece) => bbox2d([piece.ring])) : [];
 
   // Map a common-plane point back to a source wall along the projection normal.
   // For slightly inclined walls the two source points can have different Z.
@@ -334,8 +375,11 @@ export function wallFaceIntersectionAreas(
   let area = 0;
   let belowA = 0;
   let belowB = 0;
-  for (const a of piecesA) {
-    for (const b of piecesB) {
+  for (let i = 0; i < piecesA.length; i++) {
+    const a = piecesA[i]!;
+    for (let j = 0; j < piecesB.length; j++) {
+      if (bboxPrefilter && bboxesDisjoint(boxesA[i]!, boxesB[j]!)) continue;
+      const b = piecesB[j]!;
       const clipped = sutherlandHodgman(a.ring, b.ring);
       const weight = a.weight * b.weight;
       area += weight * Math.abs(signedArea2d(clipped));

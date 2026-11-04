@@ -38,6 +38,7 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
   - indexes all `WallSurface` faces across all input files into a SpatiaLite database
   - uses an R\*Tree spatial index to find candidate wall face pairs within a configurable tolerance
   - requires outward normals to oppose within 1° and every vertex to lie within the configured tolerance of the other wall's plane
+  - skips wall pairs and convex polygon pieces whose projected bounding boxes are disjoint before clipping
   - computes the actual shared wall area via symmetric 3D polygon intersection (Sutherland-Hodgman on the average projection plane)
   - handles cross-tile adjacencies — buildings near a tile edge are correctly matched against buildings in neighbouring tiles
 - Output written in place or to a separate output directory (`--out`)
