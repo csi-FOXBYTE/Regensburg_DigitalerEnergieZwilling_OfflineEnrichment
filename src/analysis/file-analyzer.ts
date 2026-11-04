@@ -1,5 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
-import { join, basename } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { adaptBuildingFeature } from "../config/adapters/buildingFeature.js";
 import { listJsonFiles } from "../discovery/list-json-files.js";
@@ -225,6 +225,48 @@ async function* iterateValidFiles(
   }
 }
 
+/** True when `path` is `dir` itself or lies below it (both absolute). */
+function isWithin(path: string, dir: string): boolean {
+  const rel = relative(dir, path);
+  return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
+}
+
+/**
+ * Maps every input file to its output path. With an output directory, the
+ * path below `srcDir` is preserved, so `a/x.json` and `b/x.json` no longer
+ * overwrite each other. Paths that would still coincide, compared without
+ * case and Unicode normalization differences because the output may land on
+ * a case-insensitive file system, abort the run instead of losing a tile.
+ *
+ * @throws When two input files map to the same output path.
+ */
+function planOutputPaths(srcDir: string, filePaths: string[], outDir: string | undefined): Map<string, string> {
+  const plan = new Map<string, string>();
+  if (!outDir) {
+    for (const filePath of filePaths) plan.set(filePath, filePath);
+    return plan;
+  }
+
+  const root = resolve(srcDir);
+  const outRoot = resolve(outDir);
+  const seen = new Map<string, string>();
+  for (const filePath of filePaths) {
+    const rel = relative(root, resolve(filePath));
+    if (rel === "" || !isWithin(resolve(filePath), root)) {
+      throw new Error(`Input file ${filePath} is outside the source directory.`);
+    }
+    const outPath = join(outRoot, rel);
+    const key = outPath.normalize("NFC").toLowerCase();
+    const previous = seen.get(key);
+    if (previous !== undefined) {
+      throw new Error(`Output path collision: ${previous} and ${filePath} both map to ${outPath}.`);
+    }
+    seen.set(key, filePath);
+    plan.set(filePath, outPath);
+  }
+  return plan;
+}
+
 /**
  * Analyzes all CityJSON files in a directory, enriches building attributes,
  * and writes updated files back. When `options.adjacency` is true a second
@@ -239,7 +281,6 @@ export async function processCityJsonFiles(
   srcDir: string,
   options: ProcessCityJsonFilesOptions = {},
 ): Promise<CityJsonAnalysisResult> {
-  const filePaths = await listJsonFiles(srcDir);
   const {
     outDir,
     adjacency,
@@ -249,6 +290,13 @@ export async function processCityJsonFiles(
     geothermalFile,
     municipalityKey,
   } = options;
+  const discovered = await listJsonFiles(srcDir);
+  // An output directory inside the source directory must not feed earlier
+  // results back in as input.
+  const filePaths = outDir && resolve(outDir) !== resolve(srcDir)
+    ? discovered.filter((filePath) => !isWithin(resolve(filePath), resolve(outDir)))
+    : discovered;
+  const outputPaths = planOutputPaths(srcDir, filePaths, outDir);
   const needsSpatialDb = adjacency || ageZonesFile != null || geothermalFile != null;
   const shouldRunFirstPass = adjacency === true;
   const shouldEnrichAgeZones = ageZonesFile != null;
@@ -311,8 +359,9 @@ export async function processCityJsonFiles(
         continue;
       }
 
-      const outPath = outDir ? join(outDir, basename(filePath)) : filePath;
+      const outPath = outputPaths.get(filePath) ?? filePath;
       try {
+        if (outPath !== filePath) await mkdir(dirname(outPath), { recursive: true });
         await writeFile(outPath, `${JSON.stringify(parsed)}\n`, "utf-8");
       } catch (error) {
         const reason = error instanceof Error ? error.message : "Unknown write error";

@@ -302,6 +302,11 @@ adaptation checklist.
 ## Important Notes
 
 - Input files are rewritten in place unless `--out` is specified.
+- With `--out`, each file keeps its path relative to the input directory
+  (`<src>/a/tile.json` is written to `<out>/a/tile.json`). If two input files
+  would still map to the same output path, compared case-insensitively, the
+  run fails before writing anything. When the output directory lies inside
+  the input directory, files in it are not read as input.
 - Non-CityJSON files are skipped.
 - Files with geometry/CRS issues are skipped with a reason in the result.
 - Coordinates are normalized to the configured analysis CRS before metric calculation.
