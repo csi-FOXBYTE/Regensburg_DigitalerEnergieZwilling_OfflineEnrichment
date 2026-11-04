@@ -33,4 +33,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY SBOM.cdx.json /usr/share/regensburg/SBOM.cdx.json
 
+# Run as the unprivileged "node" user (uid/gid 1000) shipped with the base image.
+# The app files stay root-owned and read-only; the CLI only writes to the mounted
+# job directories and os.tmpdir(). Numeric so runAsNonRoot can verify it.
+USER 1000:1000
+
 CMD ["node", "dist/cli.mjs", "--src", "/data"]

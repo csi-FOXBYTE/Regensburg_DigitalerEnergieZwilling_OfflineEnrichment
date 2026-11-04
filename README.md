@@ -190,6 +190,9 @@ docker run --rm \
   det-offline-enrichment
 ```
 
+The image runs as the non-root user `node` (uid/gid 1000). The mounted folders
+must be writable by that user, or pass a matching `--user "$(id -u):$(id -g)"`.
+
 With adjacency pass and separate output:
 
 ```bash
