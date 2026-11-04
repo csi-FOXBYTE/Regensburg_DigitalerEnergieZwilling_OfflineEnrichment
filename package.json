@@ -29,6 +29,8 @@
     "publint": "^0.3.18",
     "tsdown": "^0.21.0",
     "tsx": "^4.21.0",
+    "typedoc": "^0.28.17",
+    "typedoc-plugin-markdown": "^4.10.0",
     "typescript": "^5.9.3"
   },
   "exports": {
@@ -49,8 +51,6 @@
     "better-sqlite3": "^11.10.0",
     "proj4": "^2.20.3",
     "proj4-list": "^1.0.4",
-    "tiny-glob": "^0.2.9",
-    "typedoc": "^0.28.17",
-    "typedoc-plugin-markdown": "^4.10.0"
+    "tiny-glob": "^0.2.9"
   }
 }
