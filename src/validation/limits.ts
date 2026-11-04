@@ -4,8 +4,9 @@
  * Input tiles come from an untrusted upload. Without bounds, a single crafted
  * file can exhaust the heap (huge vertex or object arrays), overflow the
  * stack (deeply nested arrays) or make the pairwise wall-overlap computation
- * run for hours (walls with thousands of vertices). A file that exceeds any
- * limit is skipped with a clear reason, which fails the run in strict mode.
+ * of the adjacency pass run for hours (walls with thousands of vertices, or
+ * thousands of stacked walls). A file that exceeds any limit is skipped with a
+ * clear reason, which fails the run in strict mode.
  *
  * @group Validation
  */
@@ -20,12 +21,27 @@ export interface ProcessingLimits {
   maxVertices: number;
   /** Maximum number of vertex indices in one polygon ring. */
   maxRingVertices: number;
+  /**
+   * Maximum number of candidate wall pairs the adjacency pass may visit for
+   * one file: pairs of walls whose bounding boxes lie within the tolerance of
+   * each other and of which at least one belongs to this file (pairs with
+   * walls of previously indexed files included). Checked while indexing, before
+   * any pair is compared; only applies with adjacency enabled.
+   */
+  maxAdjacencyPairs: number;
+  /**
+   * Maximum sum, over the same candidate wall pairs, of the product of both
+   * walls' vertex counts (all rings). The overlap clipping of one pair costs
+   * up to this product, so this bounds the work of few but very complex walls.
+   */
+  maxAdjacencyVertexProducts: number;
 }
 
 /**
  * Default limits. They leave at least five times headroom above the largest
  * Regensburg LoD2 tile measured (25 MB, 5,578 CityObjects, 132,947 vertices,
- * 395 vertices per ring, nesting depth 10).
+ * 395 vertices per ring, nesting depth 10, 142,905 candidate wall pairs with
+ * 2,922,052 summed vertex-count products at the default tolerance).
  *
  * @group Validation
  */
@@ -35,6 +51,8 @@ export const DEFAULT_PROCESSING_LIMITS: Readonly<ProcessingLimits> = Object.free
   maxCityObjects: 100_000,
   maxVertices: 2_000_000,
   maxRingVertices: 2_000,
+  maxAdjacencyPairs: 1_000_000,
+  maxAdjacencyVertexProducts: 20_000_000,
 });
 
 /**

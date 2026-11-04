@@ -50,6 +50,49 @@ function indexBuildingsIntoDb(
   }
 }
 
+/** Signals that a file's walls exceed the adjacency budget; rolls back its index. */
+class AdjacencyBudgetExceeded extends Error {}
+
+/**
+ * Indexes one file for the adjacency pass in a single transaction and checks
+ * how many candidate wall pairs its walls add before any pair is compared.
+ * Co-located geometry (e.g. thousands of stacked buildings) makes the pairwise
+ * comparison quadratic; such a file is rolled back out of the index.
+ *
+ * @returns A reason to skip the file, or `null` when it was indexed.
+ */
+function indexFileForAdjacency(
+  parsed: CityJSONV201,
+  vertices: Vertex[],
+  filePath: string,
+  db: ReturnType<typeof openSpatialDatabase>,
+  tolerance: number,
+  limits: ProcessingLimits,
+): string | null {
+  try {
+    db.transaction(() => {
+      const watermark = db.wallSurfaceWatermark();
+      indexBuildingsIntoDb(parsed, vertices, filePath, db);
+      const { maxAdjacencyPairs, maxAdjacencyVertexProducts } = limits;
+      const measure = db.measureCandidatePairs(watermark, tolerance, maxAdjacencyPairs, maxAdjacencyVertexProducts);
+      if (measure.pairs > maxAdjacencyPairs) {
+        throw new AdjacencyBudgetExceeded(
+          `File has more than ${maxAdjacencyPairs} candidate wall pairs for the adjacency pass (limit ${maxAdjacencyPairs}).`,
+        );
+      }
+      if (measure.vertexProducts > maxAdjacencyVertexProducts) {
+        throw new AdjacencyBudgetExceeded(
+          `Candidate wall pairs of the adjacency pass exceed ${maxAdjacencyVertexProducts} summed vertex-count products (limit ${maxAdjacencyVertexProducts}).`,
+        );
+      }
+    });
+    return null;
+  } catch (error) {
+    if (error instanceof AdjacencyBudgetExceeded) return error.message;
+    throw error;
+  }
+}
+
 function enrichWithAdjacencies(
   parsed: CityJSONV201,
   db: ReturnType<typeof openSpatialDatabase>,
@@ -373,7 +416,11 @@ export async function processCityJsonFiles(
             files.push({ filePath, status: "skipped", reason });
             continue;
           }
-          indexBuildingsIntoDb(parsed, vertices, filePath, db);
+          const budgetReason = indexFileForAdjacency(parsed, vertices, filePath, db, adjacencyTolerance, limits);
+          if (budgetReason !== null) {
+            files.push({ filePath, status: "skipped", reason: budgetReason });
+            continue;
+          }
           pass1FilePaths.push(filePath);
         }
 

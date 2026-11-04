@@ -39,6 +39,7 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
   - uses an R\*Tree spatial index to find candidate wall face pairs within a configurable tolerance
   - requires outward normals to oppose within 1° and every vertex to lie within the configured tolerance of the other wall's plane
   - skips wall pairs and convex polygon pieces whose projected bounding boxes are disjoint before clipping
+  - skips files whose candidate wall pairs exceed the adjacency limits (see [Input limits and validation](#input-limits-and-validation))
   - computes the actual shared wall area via symmetric 3D polygon intersection (Sutherland-Hodgman on the average projection plane)
   - handles cross-tile adjacencies — buildings near a tile edge are correctly matched against buildings in neighbouring tiles
 - Output written in place or to a separate output directory (`--out`)
@@ -172,6 +173,8 @@ Environment alternatives:
 | `--max-city-objects` | `MAX_CITY_OBJECTS` | `100000` |
 | `--max-vertices` | `MAX_VERTICES` | `2000000` |
 | `--max-ring-vertices` | `MAX_RING_VERTICES` | `2000` |
+| `--max-adjacency-pairs` | `MAX_ADJACENCY_PAIRS` | `1000000` |
+| `--max-adjacency-vertex-products` | `MAX_ADJACENCY_VERTEX_PRODUCTS` | `20000000` |
 | *(SpatiaLite path)* | `SPATIALITE_PATH` | *(auto-detected)* |
 
 Empty or blank values for the optional settings (`OUTPUT_DIR`,
@@ -241,14 +244,24 @@ in the result (and fails the run in strict mode):
 | CityObjects per file (`maxCityObjects`) | 100,000 | after parsing |
 | Vertices per file (`maxVertices`) | 2,000,000 | after parsing |
 | Vertices per polygon ring (`maxRingVertices`) | 2,000 | after parsing |
+| Candidate wall pairs per file (`maxAdjacencyPairs`) | 1,000,000 | while indexing for the adjacency pass |
+| Summed vertex-count products of these pairs (`maxAdjacencyVertexProducts`) | 20,000,000 | while indexing for the adjacency pass |
 
 The defaults leave at least five times headroom over the largest Regensburg
 LoD2 tile measured (25 MB, 5,578 CityObjects, 132,947 vertices, 395 vertices
-per ring, nesting depth 10). The ring limit bounds the pairwise wall-overlap
-computation of the adjacency pass, whose cost grows with the product of both
-walls' vertex counts. Peak memory still grows with file size, so run the tool
-with a memory limit, and bound the total runtime externally (the adjacency
-pass compares all nearby wall pairs across all files).
+per ring, nesting depth 10, 142,905 candidate wall pairs with 2,922,052 summed
+vertex-count products).
+
+The adjacency pass compares nearby walls pairwise, so co-located geometry
+(e.g. thousands of stacked buildings) makes it quadratic, and the overlap
+clipping of one pair costs up to the product of both walls' vertex counts.
+The two adjacency limits apply only with `--adjacency`: while a file is
+indexed, its candidate wall pairs are counted before any pair is compared. A
+candidate pair is a pair of walls whose bounding boxes lie within the tolerance
+of each other and of which at least one belongs to the file, including pairs
+with walls of files indexed before it. A file over either limit is removed from
+the index again and skipped. Peak memory still grows with file size, so run
+the tool with a memory limit, and bound the total runtime externally.
 
 A file is also skipped when its `version` is not CityJSON 2.0 (`2.0` or
 `2.0.x`), when a vertex coordinate or a `transform` value is not a finite

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import test from "node:test";
 
@@ -54,5 +55,59 @@ test("analysis/hardening: semantically invalid files are skipped instead of prod
     assert.match(reasons["overflow.json"]!, /non-finite coordinates/);
     assert.ok(result.files.every((file) => file.status === "skipped"));
     assert.deepEqual(await listFiles(out), []);
+  });
+});
+
+/** `count` 1 m cube buildings stacked at the same place, shifted by `offsetX`. */
+function stackedCubes(marker: string, count: number, offsetX = 0) {
+  const template = cube(marker).CityObjects[`B-${marker}`]!;
+  const cityObjects = Object.fromEntries(
+    Array.from({ length: count }, (_, i) => [`B-${marker}-${i}`, structuredClone(template)]),
+  );
+  return cube(marker, {
+    CityObjects: cityObjects,
+    transform: { scale: [1, 1, 1], translate: [offsetX, 0, 0] },
+  });
+}
+
+test("analysis/hardening: files whose walls exceed the adjacency budget are skipped and leave no adjacencies", async () => {
+  await withDirs(async (src, out) => {
+    // "ok" shares its west wall with the stacked cubes.
+    await put(join(src, "ok.json"), stackedCubes("ok", 1, 1));
+    await put(join(src, "stacked.json"), stackedCubes("stacked", 20));
+
+    const unlimited = await processCityJsonFiles(src, { ...options, outDir: out, adjacency: true });
+    assert.ok(unlimited.files.every((file) => file.status === "analyzed"));
+    const adjacentBefore = JSON.parse(await readFile(join(out, "ok.json"), "utf8"));
+    assert.equal(JSON.parse(adjacentBefore.CityObjects["B-ok-0"].attributes.digitalEnergyTwin.adjacentBuildings).length, 20);
+
+    const limited = await processCityJsonFiles(src, {
+      ...options,
+      outDir: out,
+      adjacency: true,
+      limits: { maxAdjacencyPairs: 100 },
+    });
+    const byName = Object.fromEntries(limited.files.map((file) => [relative(src, file.filePath), file]));
+    assert.equal(byName["ok.json"]?.status, "analyzed");
+    assert.equal(byName["stacked.json"]?.status, "skipped");
+    assert.match(byName["stacked.json"]?.reason ?? "", /more than 100 candidate wall pairs for the adjacency pass \(limit 100\)/);
+    const adjacentAfter = JSON.parse(await readFile(join(out, "ok.json"), "utf8"));
+    assert.equal(adjacentAfter.CityObjects["B-ok-0"].attributes.digitalEnergyTwin.adjacentBuildings, "[]");
+  });
+});
+
+test("analysis/hardening: the adjacency budget counts pairs exactly and bounds the vertex-count products", async () => {
+  await withDirs(async (src, out) => {
+    // The four walls of one cube touch their two neighbours: 4 pairs of 4x4 vertices.
+    await put(join(src, "cube.json"), cube("cube"));
+    const run = (limits: Record<string, number>) =>
+      processCityJsonFiles(src, { ...options, outDir: out, adjacency: true, limits });
+
+    assert.equal((await run({ maxAdjacencyPairs: 4, maxAdjacencyVertexProducts: 64 })).files[0]?.status, "analyzed");
+    assert.match((await run({ maxAdjacencyPairs: 3 })).files[0]?.reason ?? "", /more than 3 candidate wall pairs/);
+    assert.match(
+      (await run({ maxAdjacencyVertexProducts: 63 })).files[0]?.reason ?? "",
+      /exceed 63 summed vertex-count products \(limit 63\)/,
+    );
   });
 });

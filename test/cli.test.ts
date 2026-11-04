@@ -89,5 +89,9 @@ test("cli: limits are configurable and invalid limit values abort the run", asyn
     const invalid = await runCli({ INPUT_DIR: src, OUTPUT_DIR: out, MAX_VERTICES: "lots" });
     assert.equal(invalid.code, 1);
     assert.match(invalid.stderr, /Invalid value for MAX_VERTICES/);
+
+    const invalidPairs = await runCli({ INPUT_DIR: src, OUTPUT_DIR: out, MAX_ADJACENCY_PAIRS: "0" });
+    assert.equal(invalidPairs.code, 1);
+    assert.match(invalidPairs.stderr, /Invalid processing limit maxAdjacencyPairs/);
   });
 });

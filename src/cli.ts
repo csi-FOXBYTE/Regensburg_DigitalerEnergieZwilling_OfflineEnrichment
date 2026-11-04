@@ -76,6 +76,8 @@ const LIMIT_SETTINGS: Record<keyof ProcessingLimits, [flag: string, envName: str
   maxCityObjects: ["--max-city-objects", "MAX_CITY_OBJECTS"],
   maxVertices: ["--max-vertices", "MAX_VERTICES"],
   maxRingVertices: ["--max-ring-vertices", "MAX_RING_VERTICES"],
+  maxAdjacencyPairs: ["--max-adjacency-pairs", "MAX_ADJACENCY_PAIRS"],
+  maxAdjacencyVertexProducts: ["--max-adjacency-vertex-products", "MAX_ADJACENCY_VERTEX_PRODUCTS"],
 };
 
 /**
@@ -141,6 +143,7 @@ function printUsage(): void {
   console.log(`Usage:
   node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback ${spatialConfig.analysisCrs}] [--address-output /data/addresses.sqlite] [--municipality-key 09362000] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg] [--strict]
     [--max-file-bytes N] [--max-nesting-depth N] [--max-city-objects N] [--max-vertices N] [--max-ring-vertices N]
+    [--max-adjacency-pairs N] [--max-adjacency-vertex-products N]
 
 Environment alternatives:
   INPUT_DIR=/data
@@ -158,6 +161,8 @@ Environment alternatives:
   MAX_CITY_OBJECTS=${DEFAULT_PROCESSING_LIMITS.maxCityObjects}
   MAX_VERTICES=${DEFAULT_PROCESSING_LIMITS.maxVertices}
   MAX_RING_VERTICES=${DEFAULT_PROCESSING_LIMITS.maxRingVertices}
+  MAX_ADJACENCY_PAIRS=${DEFAULT_PROCESSING_LIMITS.maxAdjacencyPairs}   # with ADJACENCY=1
+  MAX_ADJACENCY_VERTEX_PRODUCTS=${DEFAULT_PROCESSING_LIMITS.maxAdjacencyVertexProducts}   # with ADJACENCY=1
 
 Empty values count as unset. Files exceeding a limit are skipped.`);
 }

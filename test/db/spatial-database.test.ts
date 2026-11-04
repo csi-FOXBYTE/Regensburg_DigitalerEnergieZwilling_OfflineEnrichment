@@ -274,3 +274,57 @@ test("db/spatial-database: excludes sloping and degenerate walls from adjacency"
     db.close();
   }
 });
+
+test("db/spatial-database: measures candidate wall pairs added after a watermark", (t) => {
+  const db = tryOpenDatabase(() => 0);
+  if (!db) { t.skip("SpatiaLite not available"); return; }
+  try {
+    const unlimited = Number.MAX_SAFE_INTEGER;
+    db.addBuilding("a", "first.json", "Building");
+    db.addBuilding("b", "first.json", "Building");
+    db.addWallSurface("a", wallFace(1, 0, 1, 0, 3));
+    db.addWallSurface("b", wallFace(1, 0, 1, 0, 3));
+    db.addWallSurface("b", wallFace(9, 0, 1, 0, 3)); // beyond the tolerance
+    assert.deepEqual(db.measureCandidatePairs(0, 0.5, unlimited, unlimited), {
+      pairs: 1,
+      vertexProducts: 16,
+      exceeded: false,
+    });
+
+    // A later file counts its own pairs and those with earlier walls, once each.
+    const watermark = db.wallSurfaceWatermark();
+    db.addBuilding("c", "second.json", "Building");
+    db.addWallSurface("c", wallFace(1, 0, 1, 0, 3));
+    assert.deepEqual(db.measureCandidatePairs(watermark, 0.5, unlimited, unlimited), {
+      pairs: 2,
+      vertexProducts: 32,
+      exceeded: false,
+    });
+
+    assert.equal(db.measureCandidatePairs(watermark, 0.5, 1, unlimited).exceeded, true);
+    assert.equal(db.measureCandidatePairs(watermark, 0.5, unlimited, 31).exceeded, true);
+    assert.equal(db.measureCandidatePairs(watermark, 0.5, 2, 32).exceeded, false);
+  } finally {
+    db.close();
+  }
+});
+
+test("db/spatial-database: a failed transaction removes the walls it added", (t) => {
+  const db = tryOpenDatabase(() => 1);
+  if (!db) { t.skip("SpatiaLite not available"); return; }
+  try {
+    db.addBuilding("a", "a.json", "Building");
+    db.addWallSurface("a", wallFace(1, 0, 1, 0, 3));
+    const watermark = db.wallSurfaceWatermark();
+    assert.throws(() => db.transaction(() => {
+      db.addBuilding("b", "b.json", "Building");
+      db.addWallSurface("b", wallFace(1, 0, 1, 0, 3));
+      throw new Error("rejected");
+    }), /rejected/);
+    assert.equal(db.wallSurfaceWatermark(), watermark);
+    db.computeAdjacencies(0.5);
+    assert.deepEqual(db.getAdjacencies("a"), []);
+  } finally {
+    db.close();
+  }
+});

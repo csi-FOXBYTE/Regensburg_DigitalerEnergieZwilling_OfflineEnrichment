@@ -30,6 +30,21 @@ interface WallFaceCandidate {
   splitHeightB: number | null;
 }
 
+/**
+ * Size of the adjacency comparison attributed to one file, measured by
+ * {@link SpatialDatabase.measureCandidatePairs}.
+ *
+ * @group Database
+ */
+export interface CandidatePairMeasure {
+  /** Candidate wall pairs counted; may end in .5 as pairs within the file are seen from both walls. */
+  pairs: number;
+  /** Sum of the product of both walls' vertex counts over the counted pairs. */
+  vertexProducts: number;
+  /** True when counting stopped because a budget was exceeded. */
+  exceeded: boolean;
+}
+
 /** A geothermal parcel prepared for insertion into the temporary database. */
 export interface GeothermalZoneInput {
   category: string | null;
@@ -97,8 +112,9 @@ export function openSpatialDatabase(
   `);
   db.exec(`
     CREATE TABLE wall_surfaces (
-      building_id TEXT NOT NULL REFERENCES buildings(id),
-      rings       TEXT NOT NULL
+      building_id  TEXT NOT NULL REFERENCES buildings(id),
+      rings        TEXT NOT NULL,
+      vertex_count INTEGER NOT NULL
     )
   `);
   db.exec(`SELECT AddGeometryColumn('wall_surfaces', 'bbox_xy', ${srid}, 'LINESTRING', 'XY')`);
@@ -135,10 +151,29 @@ export function openSpatialDatabase(
     INSERT INTO buildings (id, file, type, split_height) VALUES (?, ?, ?, ?)
   `);
 
-  const stmtInsertWallSurface = db.prepare<[string, string, string]>(`
-    INSERT INTO wall_surfaces (building_id, rings, bbox_xy)
-    VALUES (?, ?, GeomFromText(?, ${srid}))
+  const stmtInsertWallSurface = db.prepare<[string, string, number, string]>(`
+    INSERT INTO wall_surfaces (building_id, rings, vertex_count, bbox_xy)
+    VALUES (?, ?, ?, GeomFromText(?, ${srid}))
   `);
+
+  const stmtWallSurfaceWatermark = db.prepare(`SELECT COALESCE(MAX(rowid), 0) FROM wall_surfaces`).pluck();
+
+  // The R*Tree lookup of stmtCandidates for the walls inserted after a
+  // watermark, without its later filters: every row returned here is a row
+  // stmtCandidates visits. Runs on the write connection so it sees the
+  // uncommitted walls of the current file.
+  const stmtNewCandidatePairs = db.prepare<{ after: number; tol: number }>(`
+    SELECT b.rowid > @after AS bothNew, a.vertex_count * b.vertex_count AS product
+    FROM wall_surfaces a, wall_surfaces b
+    WHERE a.rowid > @after
+      AND b.rowid <> a.rowid
+      AND b.rowid IN (
+        SELECT ROWID FROM SpatialIndex
+        WHERE f_table_name      = 'wall_surfaces'
+          AND f_geometry_column = 'bbox_xy'
+          AND search_frame      = ST_Expand(a.bbox_xy, @tol)
+      )
+  `).raw();
 
   const stmtCandidates = dbRead.prepare<{ tol: number }>(`
     SELECT
@@ -233,8 +268,70 @@ export function openSpatialDatabase(
       stmtInsertWallSurface.run(
         buildingId,
         JSON.stringify(face.rings),
+        face.rings.reduce((sum, ring) => sum + ring.length, 0),
         ringToLineStringWkt(outerRing),
       );
+    },
+
+    /**
+     * Runs `fn` in one write transaction; an exception rolls back every write
+     * made by `fn` and is rethrown.
+     *
+     * @group Database
+     */
+    transaction<T>(fn: () => T): T {
+      return db.transaction(fn)();
+    },
+
+    /**
+     * Returns the highest wall surface row id so far; walls added afterwards
+     * have larger ids.
+     *
+     * @group Database
+     */
+    wallSurfaceWatermark(): number {
+      return stmtWallSurfaceWatermark.get() as number;
+    },
+
+    /**
+     * Counts the candidate wall pairs that the walls added after `afterRowid`
+     * contribute to `computeAdjacencies`, and sums the product of both walls'
+     * vertex counts. A candidate pair is a pair of walls whose bounding boxes
+     * lie within the tolerance of each other, as found by the R*Tree broad
+     * phase, including pairs with earlier walls and pairs within one building
+     * (the broad phase visits those too). This is an upper bound of the pairs
+     * that reach the distance check and the overlap clipping. Counting stops
+     * as soon as either budget is exceeded, so its own cost is bounded by the
+     * budgets rather than by the number of pairs.
+     *
+     * @group Database
+     * @param afterRowid Watermark from `wallSurfaceWatermark`.
+     * @param tolerance Same tolerance as passed to `computeAdjacencies`.
+     * @param maxPairs Pair budget.
+     * @param maxVertexProducts Vertex-count product budget.
+     */
+    measureCandidatePairs(
+      afterRowid: number,
+      tolerance: number,
+      maxPairs: number,
+      maxVertexProducts: number,
+    ): CandidatePairMeasure {
+      // A pair of two new walls is returned once from each side, a pair with
+      // an earlier wall once. Count in half pairs to keep integers.
+      let halfPairs = 0;
+      let halfVertexProducts = 0;
+      const measure = (exceeded: boolean): CandidatePairMeasure => ({
+        pairs: halfPairs / 2,
+        vertexProducts: halfVertexProducts / 2,
+        exceeded,
+      });
+      for (const [bothNew, product] of stmtNewCandidatePairs.iterate({ after: afterRowid, tol: tolerance }) as Iterable<[number, number]>) {
+        const halves = bothNew === 1 ? 1 : 2;
+        halfPairs += halves;
+        halfVertexProducts += halves * product;
+        if (halfPairs > 2 * maxPairs || halfVertexProducts > 2 * maxVertexProducts) return measure(true);
+      }
+      return measure(false);
     },
 
     /**
