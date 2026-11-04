@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, open, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { adaptBuildingFeature } from "../config/adapters/buildingFeature.js";
@@ -18,9 +18,12 @@ import type {
   CityJsonFileAnalysis,
   PolygonFace,
   ProcessCityJsonFilesOptions,
+  Vertex,
 } from "../shared/types.js";
 import type { CityJSONV201 } from "../types/cityjson_2_0_1.js";
-import { isCityJsonLike } from "../validation/cityjson.js";
+import { isCityJsonLike, validateCityJsonContent } from "../validation/cityjson.js";
+import { exceedsJsonNestingDepth, resolveProcessingLimits } from "../validation/limits.js";
+import type { ProcessingLimits } from "../validation/limits.js";
 import { analyzeBuildings } from "./building-analyzer.js";
 import { filterCityObjectsByMunicipality } from "./municipality-filter.js";
 
@@ -28,12 +31,10 @@ const DEFAULT_ADJACENCY_TOLERANCE_M = 0.15;
 
 function indexBuildingsIntoDb(
   parsed: CityJSONV201,
+  vertices: Vertex[],
   filePath: string,
   db: ReturnType<typeof openSpatialDatabase>,
-  options: ProcessCityJsonFilesOptions,
 ): void {
-  const vertices = normalizeVerticesForGeometry(parsed, options);
-
   for (const buildingId of Object.keys(parsed.CityObjects)) {
     const cityObject = parsed.CityObjects[buildingId];
     if (!isObject(cityObject)) continue;
@@ -197,14 +198,39 @@ function enrichWithGeothermalZonesFromFile(
   }
 }
 
+/**
+ * Reads a file only if it does not exceed `maxFileBytes`. The size is taken
+ * from the open handle so it describes the file that is actually read.
+ */
+async function readBoundedFile(filePath: string, maxFileBytes: number): Promise<string> {
+  const handle = await open(filePath, "r");
+  try {
+    const { size } = await handle.stat();
+    if (size > maxFileBytes) {
+      throw new Error(`File is ${size} bytes (limit ${maxFileBytes}).`);
+    }
+    return await handle.readFile("utf-8");
+  } finally {
+    await handle.close();
+  }
+}
+
+/**
+ * Reads, bounds-checks, parses and validates each file. Files that fail any
+ * check are recorded as skipped; only valid documents are yielded.
+ */
 async function* iterateValidFiles(
   filePaths: string[],
   files: CityJsonFileAnalysis[],
+  limits: ProcessingLimits,
 ): AsyncGenerator<{ filePath: string; parsed: CityJSONV201 }> {
   for (const filePath of filePaths) {
     let parsed: unknown;
     try {
-      const raw = await readFile(filePath, "utf-8");
+      const raw = await readBoundedFile(filePath, limits.maxFileBytes);
+      if (exceedsJsonNestingDepth(raw, limits.maxNestingDepth)) {
+        throw new Error(`JSON nesting exceeds depth ${limits.maxNestingDepth}.`);
+      }
       parsed = JSON.parse(raw) as unknown;
     } catch (error) {
       const reason = error instanceof Error ? error.message : "Unknown read/parse error";
@@ -218,6 +244,12 @@ async function* iterateValidFiles(
         status: "skipped",
         reason: "File does not match the expected CityJSON structure (type/CityObjects/vertices).",
       });
+      continue;
+    }
+
+    const invalidReason = validateCityJsonContent(parsed, limits);
+    if (invalidReason !== null) {
+      files.push({ filePath, status: "skipped", reason: invalidReason });
       continue;
     }
 
@@ -290,6 +322,7 @@ export async function processCityJsonFiles(
     geothermalFile,
     municipalityKey,
   } = options;
+  const limits = resolveProcessingLimits(options.limits);
   const discovered = await listJsonFiles(srcDir);
   // An output directory inside the source directory must not feed earlier
   // results back in as input.
@@ -328,11 +361,19 @@ export async function processCityJsonFiles(
       if (shouldRunFirstPass) {
         pass1FilePaths = [];
 
-        for await (const { filePath, parsed } of iterateValidFiles(filePaths, files)) {
+        for await (const { filePath, parsed } of iterateValidFiles(filePaths, files, limits)) {
           if (municipalityKey != null) {
             filterCityObjectsByMunicipality(parsed, municipalityKey);
           }
-          indexBuildingsIntoDb(parsed, filePath, db, options);
+          let vertices: Vertex[];
+          try {
+            vertices = normalizeVerticesForGeometry(parsed, options);
+          } catch (error) {
+            const reason = error instanceof Error ? error.message : "Unknown geometry normalization error";
+            files.push({ filePath, status: "skipped", reason });
+            continue;
+          }
+          indexBuildingsIntoDb(parsed, vertices, filePath, db);
           pass1FilePaths.push(filePath);
         }
 
@@ -340,7 +381,7 @@ export async function processCityJsonFiles(
       }
     }
 
-    for await (const { filePath, parsed } of iterateValidFiles(pass1FilePaths ?? filePaths, files)) {
+    for await (const { filePath, parsed } of iterateValidFiles(pass1FilePaths ?? filePaths, files, limits)) {
       let buildings: BuildingAnalysisResult[];
       try {
         if (municipalityKey != null) {

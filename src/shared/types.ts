@@ -1,3 +1,5 @@
+import type { ProcessingLimits } from "../validation/limits.js";
+
 /**
  * 3D coordinate represented as `[x, y, z]`.
  *
@@ -117,4 +119,6 @@ export interface ProcessCityJsonFilesOptions extends GeometryCrsOptions {
   ageZonesFile?: string | undefined;
   /** When set, enriches buildings with groundwater heat-pump availability from the given GeoPackage. */
   geothermalFile?: string | undefined;
+  /** Per-file processing limits; omitted entries use `DEFAULT_PROCESSING_LIMITS`. */
+  limits?: Partial<Record<keyof ProcessingLimits, number | undefined>> | undefined;
 }

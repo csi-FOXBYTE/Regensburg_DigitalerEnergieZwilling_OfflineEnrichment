@@ -1,6 +1,8 @@
 import { evaluateRunResult } from "./cli-report.js";
 import { spatialConfig } from "./config/spatial.js";
 import { processCityJsonFiles } from "./index.js";
+import { DEFAULT_PROCESSING_LIMITS, resolveProcessingLimits } from "./validation/limits.js";
+import type { ProcessingLimits } from "./validation/limits.js";
 
 /**
  * CLI options for processing CityJSON files.
@@ -26,6 +28,8 @@ interface CliOptions {
   ageZonesFile?: string | undefined;
   /** When set, enriches buildings with groundwater heat-pump availability. */
   geothermalFile?: string | undefined;
+  /** Per-file processing limits. */
+  limits: ProcessingLimits;
 }
 
 /**
@@ -65,6 +69,35 @@ function readOptionalSetting(flag: string, envName: string): string | undefined 
   return value === undefined || value.trim() === "" ? undefined : value;
 }
 
+/** Flags and environment variables for each processing limit. */
+const LIMIT_SETTINGS: Record<keyof ProcessingLimits, [flag: string, envName: string]> = {
+  maxFileBytes: ["--max-file-bytes", "MAX_FILE_BYTES"],
+  maxNestingDepth: ["--max-nesting-depth", "MAX_NESTING_DEPTH"],
+  maxCityObjects: ["--max-city-objects", "MAX_CITY_OBJECTS"],
+  maxVertices: ["--max-vertices", "MAX_VERTICES"],
+  maxRingVertices: ["--max-ring-vertices", "MAX_RING_VERTICES"],
+};
+
+/**
+ * Parses the processing limits; invalid values abort instead of silently
+ * disabling a limit.
+ *
+ * @group CLI
+ * @returns Validated limits.
+ */
+function parseLimits(): ProcessingLimits {
+  const overrides: Partial<Record<keyof ProcessingLimits, number>> = {};
+  for (const [key, [flag, envName]] of Object.entries(LIMIT_SETTINGS) as [keyof ProcessingLimits, [string, string]][]) {
+    const raw = readOptionalSetting(flag, envName);
+    if (raw === undefined) continue;
+    if (!/^\d+$/.test(raw.trim())) {
+      throw new Error(`Invalid value for ${envName}/${flag}: ${JSON.stringify(raw)} (expected a positive integer).`);
+    }
+    overrides[key] = Number(raw.trim());
+  }
+  return resolveProcessingLimits(overrides);
+}
+
 /**
  * Parses CLI options from arguments and environment variables.
  *
@@ -83,6 +116,7 @@ function parseCliOptions(): CliOptions {
   const municipalityKey = readArg("--municipality-key") ?? process.env.MUNICIPALITY_KEY;
   const ageZonesFile = readOptionalSetting("--age-zones", "AGE_ZONES_FILE");
   const geothermalFile = readOptionalSetting("--geothermal", "GEOTHERMAL_FILE");
+  const limits = parseLimits();
 
   return {
     srcDir,
@@ -94,6 +128,7 @@ function parseCliOptions(): CliOptions {
     municipalityKey,
     ageZonesFile,
     geothermalFile,
+    limits,
   };
 }
 
@@ -105,6 +140,7 @@ function parseCliOptions(): CliOptions {
 function printUsage(): void {
   console.log(`Usage:
   node dist/cli.mjs --src /data [--out /data/output] [--adjacency] [--tolerance 0.15] [--source-crs-fallback ${spatialConfig.analysisCrs}] [--address-output /data/addresses.sqlite] [--municipality-key 09362000] [--age-zones /data/Baualtersklassen.gpkg] [--geothermal /data/geothermal.gpkg] [--strict]
+    [--max-file-bytes N] [--max-nesting-depth N] [--max-city-objects N] [--max-vertices N] [--max-ring-vertices N]
 
 Environment alternatives:
   INPUT_DIR=/data
@@ -117,8 +153,13 @@ Environment alternatives:
   AGE_ZONES_FILE=/data/Baualtersklassen.gpkg
   GEOTHERMAL_FILE=/data/geothermal.gpkg
   STRICT=1   # exit non-zero if any file is skipped
+  MAX_FILE_BYTES=${DEFAULT_PROCESSING_LIMITS.maxFileBytes}
+  MAX_NESTING_DEPTH=${DEFAULT_PROCESSING_LIMITS.maxNestingDepth}
+  MAX_CITY_OBJECTS=${DEFAULT_PROCESSING_LIMITS.maxCityObjects}
+  MAX_VERTICES=${DEFAULT_PROCESSING_LIMITS.maxVertices}
+  MAX_RING_VERTICES=${DEFAULT_PROCESSING_LIMITS.maxRingVertices}
 
-Empty values for optional settings count as unset.`);
+Empty values count as unset. Files exceeding a limit are skipped.`);
 }
 
 /**
@@ -142,6 +183,7 @@ async function main(): Promise<void> {
     municipalityKey: options.municipalityKey,
     ageZonesFile: options.ageZonesFile,
     geothermalFile: options.geothermalFile,
+    limits: options.limits,
   });
 
   console.log(JSON.stringify(result, null, 2));

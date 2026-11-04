@@ -79,3 +79,15 @@ test("cli: STRICT=1 fails a partial batch that otherwise succeeds", async () => 
     assert.match(strict.stderr, /Strict mode: 1 of 2 file\(s\) were skipped/);
   });
 });
+
+test("cli: limits are configurable and invalid limit values abort the run", async () => {
+  await withInput({ "tile.json": VALID }, async (src, out) => {
+    const limited = await runCli({ INPUT_DIR: src, OUTPUT_DIR: out, MAX_RING_VERTICES: "3" });
+    assert.equal(limited.code, 1);
+    assert.match(limited.stderr, /No files could be processed successfully/);
+
+    const invalid = await runCli({ INPUT_DIR: src, OUTPUT_DIR: out, MAX_VERTICES: "lots" });
+    assert.equal(invalid.code, 1);
+    assert.match(invalid.stderr, /Invalid value for MAX_VERTICES/);
+  });
+});
