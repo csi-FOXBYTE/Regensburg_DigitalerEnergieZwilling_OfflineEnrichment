@@ -50,6 +50,22 @@ function readArg(flag: string): string | undefined {
 }
 
 /**
+ * Reads an optional setting from a flag or environment variable. An empty or
+ * blank value counts as unset: orchestrators such as Airflow render optional
+ * settings as `""`, which previously reached the tool as an empty path (an
+ * empty `AGE_ZONES_FILE` made SQLite open a temporary database and abort).
+ *
+ * @group CLI
+ * @param flag CLI flag.
+ * @param envName Environment variable name.
+ * @returns The value, or `undefined` if unset or blank.
+ */
+function readOptionalSetting(flag: string, envName: string): string | undefined {
+  const value = readArg(flag) ?? process.env[envName];
+  return value === undefined || value.trim() === "" ? undefined : value;
+}
+
+/**
  * Parses CLI options from arguments and environment variables.
  *
  * @group CLI
@@ -57,15 +73,16 @@ function readArg(flag: string): string | undefined {
  */
 function parseCliOptions(): CliOptions {
   const srcDir = readArg("--src") ?? process.env.INPUT_DIR ?? "/data";
-  const outDir = readArg("--out") ?? process.env.OUTPUT_DIR;
+  const outDir = readOptionalSetting("--out", "OUTPUT_DIR");
   const adjacency = process.argv.includes("--adjacency") || process.env.ADJACENCY === "1";
   const adjacencyTolerance = parseFloat(readArg("--tolerance") ?? process.env.TOLERANCE ?? "0.15");
-  const sourceCrsFallback =
-    readArg("--source-crs-fallback") ?? process.env.SOURCE_CRS_FALLBACK;
-  const addressOutput = readArg("--address-output") ?? process.env.ADDRESS_OUTPUT;
+  const sourceCrsFallback = readOptionalSetting("--source-crs-fallback", "SOURCE_CRS_FALLBACK");
+  const addressOutput = readOptionalSetting("--address-output", "ADDRESS_OUTPUT");
+  // Not normalized: an empty key must keep filtering everything out rather
+  // than silently disable the municipality restriction.
   const municipalityKey = readArg("--municipality-key") ?? process.env.MUNICIPALITY_KEY;
-  const ageZonesFile = readArg("--age-zones") ?? process.env.AGE_ZONES_FILE;
-  const geothermalFile = readArg("--geothermal") ?? process.env.GEOTHERMAL_FILE;
+  const ageZonesFile = readOptionalSetting("--age-zones", "AGE_ZONES_FILE");
+  const geothermalFile = readOptionalSetting("--geothermal", "GEOTHERMAL_FILE");
 
   return {
     srcDir,
@@ -99,7 +116,9 @@ Environment alternatives:
   MUNICIPALITY_KEY=09362000
   AGE_ZONES_FILE=/data/Baualtersklassen.gpkg
   GEOTHERMAL_FILE=/data/geothermal.gpkg
-  STRICT=1   # exit non-zero if any file is skipped`);
+  STRICT=1   # exit non-zero if any file is skipped
+
+Empty values for optional settings count as unset.`);
 }
 
 /**

@@ -162,7 +162,19 @@ Environment alternatives:
 | `--municipality-key` | `MUNICIPALITY_KEY` | *(none)* |
 | `--age-zones` | `AGE_ZONES_FILE` | *(none)* |
 | `--geothermal` | `GEOTHERMAL_FILE` | *(none)* |
+| `--strict` | `STRICT=1` | *(off)* |
 | *(SpatiaLite path)* | `SPATIALITE_PATH` | *(auto-detected)* |
+
+Empty or blank values for the optional settings (`OUTPUT_DIR`,
+`SOURCE_CRS_FALLBACK`, `ADDRESS_OUTPUT`, `AGE_ZONES_FILE`, `GEOTHERMAL_FILE`)
+count as unset, so an orchestrator may render an unused optional setting as
+`""`. `MUNICIPALITY_KEY` is the exception: an empty key
+still filters out every CityObject instead of disabling the restriction.
+
+The CLI exits non-zero when no input file is found, when no file could be
+processed, or when two input files map to the same output path. With `STRICT=1` (or `--strict`) it also exits non-zero as soon as
+any file is skipped; use this in pipelines so a partially processed batch is
+not reported as success.
 
 Example with environment variables:
 
