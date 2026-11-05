@@ -116,6 +116,18 @@ export function normalizeVerticesForGeometry(
   cityJson: CityJSONV201,
   options: GeometryCrsOptions = {},
 ): Vertex[] {
+  const vertices = normalizeVertices(cityJson, options);
+  // Overflowing transforms or projections outside the CRS domain yield
+  // Infinity/NaN, which would otherwise surface as `null` metrics.
+  for (const vertex of vertices) {
+    if (!Number.isFinite(vertex[0]) || !Number.isFinite(vertex[1]) || !Number.isFinite(vertex[2])) {
+      throw new Error("Coordinate decoding or transformation produced non-finite coordinates.");
+    }
+  }
+  return vertices;
+}
+
+function normalizeVertices(cityJson: CityJSONV201, options: GeometryCrsOptions): Vertex[] {
   const decodedVertices = decodeVertices(cityJson);
   const referenceSystem = cityJson.metadata?.referenceSystem ?? options.sourceCrsFallback;
   const targetCrs = spatialConfig.analysisCrs;

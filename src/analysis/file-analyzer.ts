@@ -1,5 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
-import { join, basename } from "node:path";
+import { mkdir, open, writeFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { adaptBuildingFeature } from "../config/adapters/buildingFeature.js";
 import { listJsonFiles } from "../discovery/list-json-files.js";
@@ -18,9 +18,12 @@ import type {
   CityJsonFileAnalysis,
   PolygonFace,
   ProcessCityJsonFilesOptions,
+  Vertex,
 } from "../shared/types.js";
 import type { CityJSONV201 } from "../types/cityjson_2_0_1.js";
-import { isCityJsonLike } from "../validation/cityjson.js";
+import { isCityJsonLike, validateCityJsonContent } from "../validation/cityjson.js";
+import { exceedsJsonNestingDepth, resolveProcessingLimits } from "../validation/limits.js";
+import type { ProcessingLimits } from "../validation/limits.js";
 import { analyzeBuildings } from "./building-analyzer.js";
 import { filterCityObjectsByMunicipality } from "./municipality-filter.js";
 
@@ -28,12 +31,10 @@ const DEFAULT_ADJACENCY_TOLERANCE_M = 0.15;
 
 function indexBuildingsIntoDb(
   parsed: CityJSONV201,
+  vertices: Vertex[],
   filePath: string,
   db: ReturnType<typeof openSpatialDatabase>,
-  options: ProcessCityJsonFilesOptions,
 ): void {
-  const vertices = normalizeVerticesForGeometry(parsed, options);
-
   for (const buildingId of Object.keys(parsed.CityObjects)) {
     const cityObject = parsed.CityObjects[buildingId];
     if (!isObject(cityObject)) continue;
@@ -46,6 +47,49 @@ function indexBuildingsIntoDb(
         db.addWallSurface(buildingId, face);
       }
     }
+  }
+}
+
+/** Signals that a file's walls exceed the adjacency budget; rolls back its index. */
+class AdjacencyBudgetExceeded extends Error {}
+
+/**
+ * Indexes one file for the adjacency pass in a single transaction and checks
+ * how many candidate wall pairs its walls add before any pair is compared.
+ * Co-located geometry (e.g. thousands of stacked buildings) makes the pairwise
+ * comparison quadratic; such a file is rolled back out of the index.
+ *
+ * @returns A reason to skip the file, or `null` when it was indexed.
+ */
+function indexFileForAdjacency(
+  parsed: CityJSONV201,
+  vertices: Vertex[],
+  filePath: string,
+  db: ReturnType<typeof openSpatialDatabase>,
+  tolerance: number,
+  limits: ProcessingLimits,
+): string | null {
+  try {
+    db.transaction(() => {
+      const watermark = db.wallSurfaceWatermark();
+      indexBuildingsIntoDb(parsed, vertices, filePath, db);
+      const { maxAdjacencyPairs, maxAdjacencyVertexProducts } = limits;
+      const measure = db.measureCandidatePairs(watermark, tolerance, maxAdjacencyPairs, maxAdjacencyVertexProducts);
+      if (measure.pairs > maxAdjacencyPairs) {
+        throw new AdjacencyBudgetExceeded(
+          `File has more than ${maxAdjacencyPairs} candidate wall pairs for the adjacency pass (limit ${maxAdjacencyPairs}).`,
+        );
+      }
+      if (measure.vertexProducts > maxAdjacencyVertexProducts) {
+        throw new AdjacencyBudgetExceeded(
+          `Candidate wall pairs of the adjacency pass exceed ${maxAdjacencyVertexProducts} summed vertex-count products (limit ${maxAdjacencyVertexProducts}).`,
+        );
+      }
+    });
+    return null;
+  } catch (error) {
+    if (error instanceof AdjacencyBudgetExceeded) return error.message;
+    throw error;
   }
 }
 
@@ -197,14 +241,39 @@ function enrichWithGeothermalZonesFromFile(
   }
 }
 
+/**
+ * Reads a file only if it does not exceed `maxFileBytes`. The size is taken
+ * from the open handle so it describes the file that is actually read.
+ */
+async function readBoundedFile(filePath: string, maxFileBytes: number): Promise<string> {
+  const handle = await open(filePath, "r");
+  try {
+    const { size } = await handle.stat();
+    if (size > maxFileBytes) {
+      throw new Error(`File is ${size} bytes (limit ${maxFileBytes}).`);
+    }
+    return await handle.readFile("utf-8");
+  } finally {
+    await handle.close();
+  }
+}
+
+/**
+ * Reads, bounds-checks, parses and validates each file. Files that fail any
+ * check are recorded as skipped; only valid documents are yielded.
+ */
 async function* iterateValidFiles(
   filePaths: string[],
   files: CityJsonFileAnalysis[],
+  limits: ProcessingLimits,
 ): AsyncGenerator<{ filePath: string; parsed: CityJSONV201 }> {
   for (const filePath of filePaths) {
     let parsed: unknown;
     try {
-      const raw = await readFile(filePath, "utf-8");
+      const raw = await readBoundedFile(filePath, limits.maxFileBytes);
+      if (exceedsJsonNestingDepth(raw, limits.maxNestingDepth)) {
+        throw new Error(`JSON nesting exceeds depth ${limits.maxNestingDepth}.`);
+      }
       parsed = JSON.parse(raw) as unknown;
     } catch (error) {
       const reason = error instanceof Error ? error.message : "Unknown read/parse error";
@@ -221,8 +290,56 @@ async function* iterateValidFiles(
       continue;
     }
 
+    const invalidReason = validateCityJsonContent(parsed, limits);
+    if (invalidReason !== null) {
+      files.push({ filePath, status: "skipped", reason: invalidReason });
+      continue;
+    }
+
     yield { filePath, parsed };
   }
+}
+
+/** True when `path` is `dir` itself or lies below it (both absolute). */
+function isWithin(path: string, dir: string): boolean {
+  const rel = relative(dir, path);
+  return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
+}
+
+/**
+ * Maps every input file to its output path. With an output directory, the
+ * path below `srcDir` is preserved, so `a/x.json` and `b/x.json` no longer
+ * overwrite each other. Paths that would still coincide, compared without
+ * case and Unicode normalization differences because the output may land on
+ * a case-insensitive file system, abort the run instead of losing a tile.
+ *
+ * @throws When two input files map to the same output path.
+ */
+function planOutputPaths(srcDir: string, filePaths: string[], outDir: string | undefined): Map<string, string> {
+  const plan = new Map<string, string>();
+  if (!outDir) {
+    for (const filePath of filePaths) plan.set(filePath, filePath);
+    return plan;
+  }
+
+  const root = resolve(srcDir);
+  const outRoot = resolve(outDir);
+  const seen = new Map<string, string>();
+  for (const filePath of filePaths) {
+    const rel = relative(root, resolve(filePath));
+    if (rel === "" || !isWithin(resolve(filePath), root)) {
+      throw new Error(`Input file ${filePath} is outside the source directory.`);
+    }
+    const outPath = join(outRoot, rel);
+    const key = outPath.normalize("NFC").toLowerCase();
+    const previous = seen.get(key);
+    if (previous !== undefined) {
+      throw new Error(`Output path collision: ${previous} and ${filePath} both map to ${outPath}.`);
+    }
+    seen.set(key, filePath);
+    plan.set(filePath, outPath);
+  }
+  return plan;
 }
 
 /**
@@ -239,7 +356,6 @@ export async function processCityJsonFiles(
   srcDir: string,
   options: ProcessCityJsonFilesOptions = {},
 ): Promise<CityJsonAnalysisResult> {
-  const filePaths = await listJsonFiles(srcDir);
   const {
     outDir,
     adjacency,
@@ -249,6 +365,14 @@ export async function processCityJsonFiles(
     geothermalFile,
     municipalityKey,
   } = options;
+  const limits = resolveProcessingLimits(options.limits);
+  const discovered = await listJsonFiles(srcDir);
+  // An output directory inside the source directory must not feed earlier
+  // results back in as input.
+  const filePaths = outDir && resolve(outDir) !== resolve(srcDir)
+    ? discovered.filter((filePath) => !isWithin(resolve(filePath), resolve(outDir)))
+    : discovered;
+  const outputPaths = planOutputPaths(srcDir, filePaths, outDir);
   const needsSpatialDb = adjacency || ageZonesFile != null || geothermalFile != null;
   const shouldRunFirstPass = adjacency === true;
   const shouldEnrichAgeZones = ageZonesFile != null;
@@ -280,11 +404,23 @@ export async function processCityJsonFiles(
       if (shouldRunFirstPass) {
         pass1FilePaths = [];
 
-        for await (const { filePath, parsed } of iterateValidFiles(filePaths, files)) {
+        for await (const { filePath, parsed } of iterateValidFiles(filePaths, files, limits)) {
           if (municipalityKey != null) {
             filterCityObjectsByMunicipality(parsed, municipalityKey);
           }
-          indexBuildingsIntoDb(parsed, filePath, db, options);
+          let vertices: Vertex[];
+          try {
+            vertices = normalizeVerticesForGeometry(parsed, options);
+          } catch (error) {
+            const reason = error instanceof Error ? error.message : "Unknown geometry normalization error";
+            files.push({ filePath, status: "skipped", reason });
+            continue;
+          }
+          const budgetReason = indexFileForAdjacency(parsed, vertices, filePath, db, adjacencyTolerance, limits);
+          if (budgetReason !== null) {
+            files.push({ filePath, status: "skipped", reason: budgetReason });
+            continue;
+          }
           pass1FilePaths.push(filePath);
         }
 
@@ -292,7 +428,7 @@ export async function processCityJsonFiles(
       }
     }
 
-    for await (const { filePath, parsed } of iterateValidFiles(pass1FilePaths ?? filePaths, files)) {
+    for await (const { filePath, parsed } of iterateValidFiles(pass1FilePaths ?? filePaths, files, limits)) {
       let buildings: BuildingAnalysisResult[];
       try {
         if (municipalityKey != null) {
@@ -311,8 +447,9 @@ export async function processCityJsonFiles(
         continue;
       }
 
-      const outPath = outDir ? join(outDir, basename(filePath)) : filePath;
+      const outPath = outputPaths.get(filePath) ?? filePath;
       try {
+        if (outPath !== filePath) await mkdir(dirname(outPath), { recursive: true });
         await writeFile(outPath, `${JSON.stringify(parsed)}\n`, "utf-8");
       } catch (error) {
         const reason = error instanceof Error ? error.message : "Unknown write error";

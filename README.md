@@ -13,7 +13,7 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
 ## Features
 
 - Recursive JSON discovery with `tiny-glob`
-- CityJSON structure guard before analysis
+- CityJSON structure and content validation with per-file size and complexity limits before analysis
 - Geometry metrics per building:
   - `volume`
   - `groundArea`
@@ -38,6 +38,8 @@ The tool scans a folder for `*.json`, validates CityJSON structure, computes bui
   - indexes all `WallSurface` faces across all input files into a SpatiaLite database
   - uses an R\*Tree spatial index to find candidate wall face pairs within a configurable tolerance
   - requires outward normals to oppose within 1° and every vertex to lie within the configured tolerance of the other wall's plane
+  - skips wall pairs and convex polygon pieces whose projected bounding boxes are disjoint before clipping
+  - skips files whose candidate wall pairs exceed the adjacency limits (see [Input limits and validation](#input-limits-and-validation))
   - computes the actual shared wall area via symmetric 3D polygon intersection (Sutherland-Hodgman on the average projection plane)
   - handles cross-tile adjacencies — buildings near a tile edge are correctly matched against buildings in neighbouring tiles
 - Output written in place or to a separate output directory (`--out`)
@@ -94,8 +96,10 @@ confirmation box stating that it will use the committed package version. The
 workflow stops if that version already has a tag. It regenerates both SBOMs with
 Node.js 22.23.4 and pnpm 11.3.0, saves them as a workflow artifact, commits them
 to `main`, and tags that release commit with the package version. It builds the
-image from that exact commit, embeds `SBOM.cdx.json`, and produces a BuildKit SBOM
-attestation. Tag pushes and other commits do not start the workflow. The image
+image from that exact commit, embeds the runtime part of `SBOM.cdx.json` (the
+npm packages installed in the image plus the base image and system packages,
+derived by `scripts/runtime-sbom.mjs`) at `/usr/share/regensburg/SBOM.cdx.json`,
+and produces a BuildKit SBOM attestation. Tag pushes and other commits do not start the workflow. The image
 does not include an audit receipt.
 A full ScanCode/SPDX compliance audit must be run separately when preparing
 an openCode publication; normal image builds do not run it.
@@ -128,6 +132,7 @@ Options:
 | `municipalityKey` | `string` | Retain only CityObjects whose adapter-provided municipality key exactly matches this value. Objects without a key are excluded. |
 | `ageZonesFile` | `string` | Enrich construction years from this GeoPackage. |
 | `geothermalFile` | `string` | Enrich groundwater heat-pump availability from the configured GeoPackage layer. |
+| `limits` | `Partial<ProcessingLimits>` | Override the per-file processing limits (see [Input limits and validation](#input-limits-and-validation)). |
 
 Return shape:
 
@@ -162,7 +167,27 @@ Environment alternatives:
 | `--municipality-key` | `MUNICIPALITY_KEY` | *(none)* |
 | `--age-zones` | `AGE_ZONES_FILE` | *(none)* |
 | `--geothermal` | `GEOTHERMAL_FILE` | *(none)* |
+| `--strict` | `STRICT=1` | *(off)* |
+| `--max-file-bytes` | `MAX_FILE_BYTES` | `134217728` (128 MiB) |
+| `--max-nesting-depth` | `MAX_NESTING_DEPTH` | `32` |
+| `--max-city-objects` | `MAX_CITY_OBJECTS` | `100000` |
+| `--max-vertices` | `MAX_VERTICES` | `2000000` |
+| `--max-ring-vertices` | `MAX_RING_VERTICES` | `2000` |
+| `--max-adjacency-pairs` | `MAX_ADJACENCY_PAIRS` | `1000000` |
+| `--max-adjacency-vertex-products` | `MAX_ADJACENCY_VERTEX_PRODUCTS` | `20000000` |
 | *(SpatiaLite path)* | `SPATIALITE_PATH` | *(auto-detected)* |
+
+Empty or blank values for the optional settings (`OUTPUT_DIR`,
+`SOURCE_CRS_FALLBACK`, `ADDRESS_OUTPUT`, `AGE_ZONES_FILE`, `GEOTHERMAL_FILE`
+and the limits) count as unset, so an orchestrator may render an unused
+optional setting as `""`. `MUNICIPALITY_KEY` is the exception: an empty key
+still filters out every CityObject instead of disabling the restriction.
+
+The CLI exits non-zero when no input file is found, when no file could be
+processed, when a setting is invalid, or when two input files map to the same
+output path. With `STRICT=1` (or `--strict`) it also exits non-zero as soon as
+any file is skipped; use this in pipelines so a partially processed batch is
+not reported as success.
 
 Example with environment variables:
 
@@ -190,6 +215,11 @@ docker run --rm \
   det-offline-enrichment
 ```
 
+The image runs as the non-root user `node` (uid/gid 1000). The mounted folders
+must be writable by that user, or pass a matching `--user "$(id -u):$(id -g)"`.
+It contains only the production dependencies and `node`; the base image's
+package managers (npm, npx, corepack, yarn) are removed.
+
 With adjacency pass and separate output:
 
 ```bash
@@ -200,6 +230,44 @@ docker run --rm \
   det-offline-enrichment \
   node dist/cli.mjs --src /data/cityjson --out /data/output --adjacency
 ```
+
+## Input limits and validation
+
+Input files are untrusted. Before deep processing, each file is checked
+against the following limits; a file that exceeds one is skipped with a reason
+in the result (and fails the run in strict mode):
+
+| Limit | Default | Checked |
+|---|---|---|
+| File size (`maxFileBytes`) | 128 MiB | before the file is read |
+| JSON nesting depth (`maxNestingDepth`) | 32 | on the raw text, before parsing |
+| CityObjects per file (`maxCityObjects`) | 100,000 | after parsing |
+| Vertices per file (`maxVertices`) | 2,000,000 | after parsing |
+| Vertices per polygon ring (`maxRingVertices`) | 2,000 | after parsing |
+| Candidate wall pairs per file (`maxAdjacencyPairs`) | 1,000,000 | while indexing for the adjacency pass |
+| Summed vertex-count products of these pairs (`maxAdjacencyVertexProducts`) | 20,000,000 | while indexing for the adjacency pass |
+
+The defaults leave at least five times headroom over the largest Regensburg
+LoD2 tile measured (25 MB, 5,578 CityObjects, 132,947 vertices, 395 vertices
+per ring, nesting depth 10, 142,905 candidate wall pairs with 2,922,052 summed
+vertex-count products).
+
+The adjacency pass compares nearby walls pairwise, so co-located geometry
+(e.g. thousands of stacked buildings) makes it quadratic, and the overlap
+clipping of one pair costs up to the product of both walls' vertex counts.
+The two adjacency limits apply only with `--adjacency`: while a file is
+indexed, its candidate wall pairs are counted before any pair is compared. A
+candidate pair is a pair of walls whose bounding boxes lie within the tolerance
+of each other and of which at least one belongs to the file, including pairs
+with walls of files indexed before it. A file over either limit is removed from
+the index again and skipped. Peak memory still grows with file size, so run
+the tool with a memory limit, and bound the total runtime externally.
+
+A file is also skipped when its `version` is not CityJSON 2.0 (`2.0` or
+`2.0.x`), when a vertex coordinate or a `transform` value is not a finite
+number, when `transform.scale` contains zero, when a geometry uses a vertex
+index that is not an integer inside the vertex array, or when decoding and
+projecting its coordinates produces non-finite values.
 
 ## Output Enrichment Format
 
@@ -299,6 +367,11 @@ adaptation checklist.
 ## Important Notes
 
 - Input files are rewritten in place unless `--out` is specified.
+- With `--out`, each file keeps its path relative to the input directory
+  (`<src>/a/tile.json` is written to `<out>/a/tile.json`). If two input files
+  would still map to the same output path, compared case-insensitively, the
+  run fails before writing anything. When the output directory lies inside
+  the input directory, files in it are not read as input.
 - Non-CityJSON files are skipped.
 - Files with geometry/CRS issues are skipped with a reason in the result.
 - Coordinates are normalized to the configured analysis CRS before metric calculation.

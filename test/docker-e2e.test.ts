@@ -10,6 +10,8 @@ import { isCityJsonLike } from "../src/validation/cityjson.js";
 import { isObject } from "../src/shared/guards.js";
 
 const execFileAsync = promisify(execFile);
+// The CLI prints the full per-building result as JSON, which exceeds the 1 MB default.
+const EXEC_MAX_BUFFER = 64 * 1024 * 1024;
 
 const EXPECTED_METRIC_KEYS = [
   "volume",
@@ -56,7 +58,9 @@ test("docker e2e: image runs CLI and enriches mounted CityJSON files", async (t)
     await access(dockerfilePath);
     await cp(fixtureDir, tmpDataDir, { recursive: true });
 
-    await execFileAsync("docker", ["build", "--file", dockerfilePath, "-t", imageTag, "."]);
+    await execFileAsync("docker", ["build", "--file", dockerfilePath, "-t", imageTag, "."], {
+      maxBuffer: EXEC_MAX_BUFFER,
+    });
 
     const runResult = await execFileAsync("docker", [
       "run",
@@ -68,7 +72,7 @@ test("docker e2e: image runs CLI and enriches mounted CityJSON files", async (t)
       "-e", "AGE_ZONES_FILE=/data/Baualtersklassen.gpkg",
       "-e", "ADDRESS_OUTPUT=/data/addresses.sqlite",
       imageTag,
-    ]);
+    ], { maxBuffer: EXEC_MAX_BUFFER });
 
     const parsedRunResult = JSON.parse(runResult.stdout) as unknown;
     assert.ok(isObject(parsedRunResult), "Expected JSON result from CLI");
